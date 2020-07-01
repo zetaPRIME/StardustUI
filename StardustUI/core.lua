@@ -45,6 +45,7 @@ ui.playerSurround:RegisterEvent "NAME_PLATE_UNIT_ADDED"
 ui.playerSurround:RegisterEvent "NAME_PLATE_UNIT_REMOVED"
 
 ui.playerSurround:SetHeight(1) ui.playerSurround:SetWidth(1)
+ui.playerSurround:SetFrameStrata("LOW")
 ui.playerSurround:SetScript("onUpdate", function(self, dt)
   if not prd then self:SetAlpha(0) return nil end
   
@@ -76,7 +77,6 @@ ui.playerSurround:SetScript("onUpdate", function(self, dt)
   self:Show()
   
   prd:Hide() -- hide default display
-  self:SetFrameStrata("LOW")
 end)
 
 function ui.playerSurround.events:ADDONS_UNLOADING()
