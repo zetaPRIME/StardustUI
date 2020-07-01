@@ -1,0 +1,7 @@
+## Interface: 80300
+## Title: StardustUI
+## Author: Zithia Satazaki
+## Version: 0.01
+## OptionalDeps: WeakAuras, Masque
+
+core.lua
