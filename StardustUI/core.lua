@@ -157,7 +157,10 @@ end
 
 ui.playerHud:SetScript("onUpdate", function(self, dt)
   local targetAlpha = 0
-  if UnitExists("target") then targetAlpha = 0.5 end
+  if UnitExists("target")
+    and UnitCanAttack("player", "target")
+    and not UnitIsDead("target")
+    then targetAlpha = 0.5 end
   if UnitAffectingCombat("player") then targetAlpha = 1 end
   
   self.alpha = self.alpha or targetAlpha
