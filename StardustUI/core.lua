@@ -74,13 +74,18 @@ ui.playerSurround:SetScript("onUpdate", function(self, dt)
   self:ClearAllPoints()
   self:SetPoint("CENTER", prd, "TOP", 0, cp/scale)
   self:Show()
+  
+  prd:Hide() -- hide default display
+  self:SetFrameStrata("LOW")
 end)
 
 function ui.playerSurround.events:ADDONS_UNLOADING()
-  -- revert cvar tinkering
+  -- revert cvar tinkering (to defaults)
   SetCVar("nameplatePersonalShowAlways", 0)
+  SetCVar("nameplateSelfBottomInset", 0.2)
 end
 SetCVar("nameplatePersonalShowAlways", 1)
+SetCVar("nameplateSelfBottomInset", 0)
 
 function ui.playerSurround.events:NAME_PLATE_UNIT_ADDED(nameplate)
   if UnitIsUnit(nameplate, "player") then
@@ -95,7 +100,6 @@ function ui.playerSurround.events:NAME_PLATE_UNIT_ADDED(nameplate)
       end
       --self:SetParent(prd)
       self:Show()
-      prd:Hide() -- hide default display
     else
       prd, zoomAcc = nil
       self:ClearAllPoints()
