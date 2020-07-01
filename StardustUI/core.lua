@@ -168,13 +168,22 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
   self.alpha = self.alpha + math.min(math.abs(diff), dt * 3) * sign(diff)
   self:SetAlpha(self.alpha * 0.75)
   
-  if self.alpha > 0 then -- update stats
-    local _, pt = UnitPowerType("player")
-    local pc = PowerBarColor[pt]
+  if self.alpha > 0 then -- update stats and display properties
+    local scale = Lerp(1.5, 1.0, clamp(self.alpha*2)^0.5)
+    self:SetScale(scale)
+    self:SetWidth(2 * (150 + 250 * (1 - self.alpha^0.1)) / scale)
     
     self.healthBar:SetValue(UnitHealth("player") / UnitHealthMax("player"))
     self.powerBar:SetValue(UnitPower("player") / UnitPowerMax("player"))
-    self.powerBar:SetStatusBarColor(pc.r, pc.g, pc.b)
   end
   
 end)
+
+function ui.playerHud:setupForSpec()
+  local _, pt = UnitPowerType("player")
+  local pc = PowerBarColor[pt]
+  self.powerBar:SetStatusBarColor(pc.r, pc.g, pc.b)
+end
+
+function ui.playerHud.events:PLAYER_SPECIALIZATION_CHANGED() self:setupForSpec() end
+function ui.playerHud.events:ADDON_LOADED() self:setupForSpec() end
