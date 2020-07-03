@@ -74,7 +74,11 @@ ui.playerSurround:SetScript("onUpdate", function(self, dt)
   self:SetScale(scale)
   
   self:ClearAllPoints()
-  self:SetPoint("CENTER", prd, "TOP", 0, cp/scale)
+  if zoom == 0 then
+    self:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+  else
+    self:SetPoint("CENTER", prd, "TOP", 0, cp/scale + 25)
+  end
   self:Show()
   
   prd:Hide() -- hide default display
@@ -121,7 +125,7 @@ end
 
 ui.playerHud = ui.createFrame("Frame", "StardustUI:PlayerHUD", ui.playerSurround)
 ui.playerHud:SetHeight(1) ui.playerHud:SetWidth(2*150)
-ui.playerHud:SetPoint("CENTER", ui.playerSurround, "CENTER", 0, 25)
+ui.playerHud:SetPoint("CENTER", ui.playerSurround, "CENTER", 0, 0)
 ui.playerHud:Show()
 ui.playerHud:SetAlpha(0.75)
 
