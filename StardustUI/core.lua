@@ -84,6 +84,16 @@ ui.playerSurround:SetScript("onUpdate", function(self, dt)
   prd:Hide() -- hide default display
 end)
 
+--[[
+ui.playerSurround.crosshair = ui.playerSurround:CreateTexture()
+ui.playerSurround.crosshair:SetWidth(64)
+ui.playerSurround.crosshair:SetHeight(64)
+ui.playerSurround.crosshair:SetPoint("CENTER", ui.playerSurround, "CENTER", 0, 0)
+ui.playerSurround.crosshair:SetTexture(165635)
+ui.playerSurround.crosshair:SetAlpha(0.25)
+ui.playerSurround.crosshair:Show()
+--]]
+
 function ui.playerSurround.events:ADDONS_UNLOADING()
   -- revert cvar tinkering (to defaults)
   SetCVar("nameplatePersonalShowAlways", 0)
@@ -134,6 +144,8 @@ SpellActivationOverlayFrame:ClearAllPoints()
 SpellActivationOverlayFrame:SetParent(ui.playerHud)
 SpellActivationOverlayFrame:SetPoint("CENTER", ui.playerHud, "CENTER", 0, 0)
 SpellActivationOverlayFrame:SetScale(1.5)
+SpellActivationOverlayFrame:SetFrameStrata("LOW")
+SpellActivationOverlayFrame:Lower()
 
 do
   local healthBar = ui.createFrame("StatusBar", nil, ui.playerHud)
