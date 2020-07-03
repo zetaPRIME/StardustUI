@@ -65,6 +65,7 @@ ui.playerSurround:SetScript("onUpdate", function(self, dt)
   local ezoom = zoomAcc
   if ezoom > minScaleZoom then ezoom = minScaleZoom + (ezoom - minScaleZoom) * 0.5 end
   local cp = 500 - (ezoom^1.1) * 11
+  if ezoom < 10 then cp = cp + (10 - ezoom) * 60 end
   cp = cp * 0.3 * (raceHeight[race] or 1.0)
   
   local scaleProp = clamp((zoomAcc-maxScaleZoom) / (minScaleZoom-maxScaleZoom))
@@ -123,6 +124,12 @@ ui.playerHud:SetHeight(1) ui.playerHud:SetWidth(2*150)
 ui.playerHud:SetPoint("CENTER", ui.playerSurround, "CENTER", 0, 25)
 ui.playerHud:Show()
 ui.playerHud:SetAlpha(0.75)
+
+-- parent proc frame to HUD
+SpellActivationOverlayFrame:ClearAllPoints()
+SpellActivationOverlayFrame:SetParent(ui.playerHud)
+SpellActivationOverlayFrame:SetPoint("CENTER", ui.playerHud, "CENTER", 0, 0)
+SpellActivationOverlayFrame:SetScale(1.5)
 
 do
   local healthBar = ui.createFrame("StatusBar", nil, ui.playerHud)
