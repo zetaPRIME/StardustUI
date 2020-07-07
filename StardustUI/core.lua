@@ -210,7 +210,7 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
   self.alpha = self.alpha or targetAlpha
   local diff = targetAlpha - self.alpha
   self.alpha = self.alpha + math.min(math.abs(diff), dt * 3) * sign(diff)
-  self:SetAlpha(self.alpha)-- * 0.75)
+  self:SetAlpha(self.alpha * 0.75)
   
   if self.alpha > 0 then -- update stats and display properties
     local scale = Lerp(1.5, 1.0, clamp(self.alpha*2)^0.5)
