@@ -40,12 +40,8 @@ local raceHeight = {
 local prd
 ui.playerSurround = ui.createFrame("Frame", nil, UIParent)
 
-ui.playerSurround:RegisterEvent "ADDONS_UNLOADING"
-ui.playerSurround:RegisterEvent "NAME_PLATE_UNIT_ADDED"
-ui.playerSurround:RegisterEvent "NAME_PLATE_UNIT_REMOVED"
-
 ui.playerSurround:SetHeight(1) ui.playerSurround:SetWidth(1)
-ui.playerSurround:SetFrameStrata("LOW")
+ui.playerSurround:SetFrameStrata("MEDIUM")
 ui.playerSurround:SetScript("onUpdate", function(self, dt)
   if not prd then self:SetAlpha(0) return nil end
   
@@ -82,6 +78,7 @@ ui.playerSurround:SetScript("onUpdate", function(self, dt)
   self:Show()
   
   prd:Hide() -- hide default display
+  prd:SetSize(1, 1)
 end)
 
 --[[
@@ -100,7 +97,7 @@ function ui.playerSurround.events:ADDONS_UNLOADING()
   SetCVar("nameplateSelfBottomInset", 0.2)
 end
 SetCVar("nameplatePersonalShowAlways", 1)
-SetCVar("nameplateSelfBottomInset", 0)
+SetCVar("nameplateSelfBottomInset", 0.10)
 
 function ui.playerSurround.events:NAME_PLATE_UNIT_ADDED(nameplate)
   if UnitIsUnit(nameplate, "player") then
@@ -114,6 +111,10 @@ function ui.playerSurround.events:NAME_PLATE_UNIT_ADDED(nameplate)
         prd = frame
       end
       --self:SetParent(prd)
+      prd:EnableMouse(false) -- clickthrough\
+      for _, c in pairs { prd:GetChildren() } do
+        c:SetHeight(0) -- effectively hard disable
+      end
       self:Show()
     else
       prd, zoomAcc = nil
@@ -150,7 +151,7 @@ SpellActivationOverlayFrame:Lower()
 do
   local healthBar = ui.createFrame("StatusBar", nil, ui.playerHud)
   ui.playerHud.healthBar = healthBar
-  healthBar:SetHeight(256) healthBar:SetWidth(64)
+  healthBar:SetSize(64, 256)
   healthBar:SetPoint("CENTER", ui.playerHud, "LEFT", 0, 0)
   healthBar:SetStatusBarTexture(ui.texture "healthBarFill")
   healthBar:SetStatusBarColor(1, 0, 0)
@@ -167,7 +168,7 @@ do
   
   local powerBar = ui.createFrame("StatusBar", nil, ui.playerHud)
   ui.playerHud.powerBar = powerBar
-  powerBar:SetHeight(256) powerBar:SetWidth(64)
+  powerBar:SetSize(64, 256)
   powerBar:SetPoint("CENTER", ui.playerHud, "RIGHT", 0, 0)
   powerBar:SetStatusBarTexture(ui.texture "powerBarFill")
   powerBar:SetOrientation("VERTICAL")
@@ -180,6 +181,22 @@ do
   powerBar.bg:SetAllPoints(true)
   
   powerBar:Show()
+  
+  local powerBar2 = ui.createFrame("StatusBar", nil, ui.playerHud)
+  ui.playerHud.powerBar2 = powerBar2
+  powerBar2:SetSize(64, 256)
+  powerBar2:SetPoint("CENTER", ui.playerHud, "RIGHT", 24, 0)
+  powerBar2:SetStatusBarTexture(ui.texture "powerBarFill")
+  powerBar2:SetOrientation("VERTICAL")
+  
+  powerBar2:SetMinMaxValues(-0.14, 1.14)
+  powerBar2:SetValue(1)
+  
+  powerBar2.bg = powerBar2:CreateTexture(nil, "BACKGROUND")
+  powerBar2.bg:SetTexture(ui.texture "powerBarBackground")
+  powerBar2.bg:SetAllPoints(true)
+  
+  powerBar2:Show()
 end
 
 ui.playerHud:SetScript("onUpdate", function(self, dt)
@@ -193,7 +210,7 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
   self.alpha = self.alpha or targetAlpha
   local diff = targetAlpha - self.alpha
   self.alpha = self.alpha + math.min(math.abs(diff), dt * 3) * sign(diff)
-  self:SetAlpha(self.alpha * 0.75)
+  self:SetAlpha(self.alpha)-- * 0.75)
   
   if self.alpha > 0 then -- update stats and display properties
     local scale = Lerp(1.5, 1.0, clamp(self.alpha*2)^0.5)
@@ -201,16 +218,76 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     self:SetWidth(2 * (150 + 250 * (1 - self.alpha^0.1)) / scale)
     
     self.healthBar:SetValue(UnitHealth("player") / UnitHealthMax("player"))
-    self.powerBar:SetValue(UnitPower("player") / UnitPowerMax("player"))
+    if self.powerType then
+      self.powerBar:SetValue(UnitPower("player", self.powerType.id) / UnitPowerMax("player", self.powerType.id))
+    end
+    if self.powerType2 then
+      local v, max = UnitPower("player", self.powerType2.id), UnitPowerMax("player", self.powerType2.id)
+      if self.powerType2.type == "RUNES" then
+        v = 0
+        for i = 1, math.floor(max) do
+          if GetRuneCount(i) ~= 0 then v = v + 1 end
+        end
+      end
+      self.powerBar2:SetValue(v / max)
+    end
   end
   
 end)
 
-function ui.playerHud:setupForSpec()
-  local _, pt = UnitPowerType("player")
-  local pc = PowerBarColor[pt]
-  self.powerBar:SetStatusBarColor(pc.r, pc.g, pc.b)
+local SecondaryPowerTypes = { -- name, is combo point
+  [4] = {"COMBO_POINTS", true},
+  [5] = {"RUNES", true},
+  [7] = {"SOUL_SHARDS", true},
+  [9] = {"HOLY_POWER", true},
+  [12] = {"CHI", true},
+  --
+}
+
+local function powerStats(u, i) -- 1-index
+  local n, pt, r, g, b = UnitPowerType(u or "player", i)
+  if not pt then return nil end
+  if not r then
+    local pc = PowerBarColor[pt]
+    r, g, b = pc.r, pc.g, pc.b
+  end
+  return { id = n, type = pt, color = {r, g, b} }
 end
 
-function ui.playerHud.events:PLAYER_SPECIALIZATION_CHANGED() self:setupForSpec() end
-function ui.playerHud.events:ADDON_LOADED() self:setupForSpec() end
+local function powerTypeStats(u, id)
+  if UnitPowerMax(u or "player", id) <= 0 then return nil end
+  local spt = SecondaryPowerTypes[id]
+  if not spt then return nil end
+  local pc = PowerBarColor[spt[1]] or {r = 0, g = 255, b = 255}
+  return { id = id, type = spt[1], isCombo = spt[2], color = {pc.r, pc.g, pc.b} }
+end
+
+function ui.playerHud:setupForSpec()
+  local bpi = 24
+  local bpos = bpi
+  self.powerBar:Hide()
+  self.powerBar2:Hide()
+  
+  self.powerType = powerStats("player", 1)
+  self.powerType2 = nil
+  for k, v in pairs(SecondaryPowerTypes) do
+    local ps = powerTypeStats("player", k)
+    if ps then print(ps.type) self.powerType2 = ps break end
+  end
+  
+  if self.powerType then
+    self.powerBar:Show()
+    self.powerBar:SetStatusBarColor(unpack(self.powerType.color))
+  end
+  
+  if self.powerType2 then
+    self.powerBar2:Show()
+    self.powerBar2:SetStatusBarColor(unpack(self.powerType2.color))
+    self.powerBar2:SetPoint("CENTER", self, "RIGHT", bpos, 0)
+    bpos = bpos + bpi
+  end
+end
+
+function ui.playerHud.events:PLAYER_SPECIALIZATION_CHANGED() C_Timer.After(0.1, function() self:setupForSpec() end) end
+local loaded
+function ui.playerHud.events:ADDON_LOADED() if not loaded then loaded = true C_Timer.After(0.1, function() self:setupForSpec() end) end end
