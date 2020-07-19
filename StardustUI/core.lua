@@ -289,5 +289,6 @@ function ui.playerHud:setupForSpec()
 end
 
 function ui.playerHud.events:PLAYER_SPECIALIZATION_CHANGED() C_Timer.After(0.1, function() self:setupForSpec() end) end
+ui.playerHud.events.PLAYER_TALENT_UPDATE = ui.playerHud.events.PLAYER_SPECIALIZATION_CHANGED
 local loaded
 function ui.playerHud.events:ADDON_LOADED() if not loaded then loaded = true C_Timer.After(0.1, function() self:setupForSpec() end) end end
