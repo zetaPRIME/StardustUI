@@ -272,7 +272,7 @@ function ui.playerHud:setupForSpec()
   self.powerType2 = nil
   for k, v in pairs(SecondaryPowerTypes) do
     local ps = powerTypeStats("player", k)
-    if ps then print(ps.type) self.powerType2 = ps break end
+    if ps then --[[print(ps.type)]] self.powerType2 = ps break end
   end
   
   if self.powerType then
