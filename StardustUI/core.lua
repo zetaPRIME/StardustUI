@@ -91,13 +91,17 @@ ui.playerSurround.crosshair:SetAlpha(0.25)
 ui.playerSurround.crosshair:Show()
 --]]
 
+C_Timer.After(0.1, function()
+  -- set up our cvars
+  SetCVar("nameplatePersonalShowAlways", 1)
+  SetCVar("nameplateSelfBottomInset", 0.10)
+end)
+
 function ui.playerSurround.events:ADDONS_UNLOADING()
   -- revert cvar tinkering (to defaults)
   SetCVar("nameplatePersonalShowAlways", 0)
   SetCVar("nameplateSelfBottomInset", 0.2)
 end
-SetCVar("nameplatePersonalShowAlways", 1)
-SetCVar("nameplateSelfBottomInset", 0.10)
 
 function ui.playerSurround.events:NAME_PLATE_UNIT_ADDED(nameplate)
   if UnitIsUnit(nameplate, "player") then
