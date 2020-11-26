@@ -91,11 +91,14 @@ ui.playerSurround.crosshair:SetAlpha(0.25)
 ui.playerSurround.crosshair:Show()
 --]]
 
-C_Timer.After(0.1, function()
-  -- set up our cvars
+do -- handle setting up and reverting cvars
+end
+local function setupCVars()
   SetCVar("nameplatePersonalShowAlways", 1)
   SetCVar("nameplateSelfBottomInset", 0.10)
-end)
+end
+C_Timer.After(0.1, setupCVars)
+C_Timer.After(5, setupCVars)
 
 function ui.playerSurround.events:ADDONS_UNLOADING()
   -- revert cvar tinkering (to defaults)
@@ -204,6 +207,8 @@ do
 end
 
 ui.playerHud:SetScript("onUpdate", function(self, dt)
+  setupCVars() -- fuck it, sledgehammer
+  
   local targetAlpha = 0
   if UnitExists("target")
     and UnitCanAttack("player", "target")
@@ -227,11 +232,13 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     end
     if self.powerType2 then
       local v, max = UnitPower("player", self.powerType2.id), UnitPowerMax("player", self.powerType2.id)
-      if self.powerType2.type == "RUNES" then
+      if self.powerType2.type == "RUNES" then -- track DK runes simply for now
         v = 0
         for i = 1, math.floor(max) do
           if GetRuneCount(i) ~= 0 then v = v + 1 end
         end
+      elseif self.powerType2.type == "SOUL_SHARDS" then -- take destro fragments into account
+        v = UnitPower("player", self.powerType2.id, true) / 10
       end
       self.powerBar2:SetValue(v / max)
     end
