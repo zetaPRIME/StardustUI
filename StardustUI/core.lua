@@ -91,8 +91,7 @@ ui.playerSurround.crosshair:SetAlpha(0.25)
 ui.playerSurround.crosshair:Show()
 --]]
 
-do -- handle setting up and reverting cvars
-end
+-- handle setting up and reverting cvars
 local function setupCVars()
   SetCVar("nameplatePersonalShowAlways", 1)
   SetCVar("nameplateSelfBottomInset", 0.10)
@@ -154,6 +153,15 @@ SpellActivationOverlayFrame:SetPoint("CENTER", ui.playerHud, "CENTER", 0, 0)
 SpellActivationOverlayFrame:SetScale(1.5)
 SpellActivationOverlayFrame:SetFrameStrata("LOW")
 SpellActivationOverlayFrame:Lower()
+
+-- parent cast bar
+UIPARENT_MANAGED_FRAME_POSITIONS.CastingBarFrame = nil -- disable UIParent trying to set points
+CastingBarFrame:SetParent(ui.playerSurround)
+CastingBarFrame:ClearAllPoints()
+CastingBarFrame:SetPoint("CENTER", ui.playerSurround, "CENTER", 0, -110)
+CastingBarFrame:SetScale(1.75)
+CastingBarFrame:SetFrameStrata("LOW")
+--CastingBarFrame:Lower()
 
 do
   local healthBar = ui.createFrame("StatusBar", nil, ui.playerHud)
@@ -302,4 +310,8 @@ end
 function ui.playerHud.events:PLAYER_SPECIALIZATION_CHANGED() C_Timer.After(0.1, function() self:setupForSpec() end) end
 ui.playerHud.events.PLAYER_TALENT_UPDATE = ui.playerHud.events.PLAYER_SPECIALIZATION_CHANGED
 local loaded
-function ui.playerHud.events:ADDON_LOADED() if not loaded then loaded = true C_Timer.After(0.1, function() self:setupForSpec() end) end end
+function ui.playerHud.events:ADDON_LOADED()
+  if not loaded then loaded = true C_Timer.After(0.1, function() self:setupForSpec() end) end
+  
+  --
+end
