@@ -159,7 +159,7 @@ UIPARENT_MANAGED_FRAME_POSITIONS.CastingBarFrame = nil -- disable UIParent tryin
 CastingBarFrame:SetParent(ui.playerSurround)
 CastingBarFrame:ClearAllPoints()
 CastingBarFrame:SetPoint("CENTER", ui.playerSurround, "CENTER", 0, -110)
-CastingBarFrame:SetScale(1.75)
+CastingBarFrame:SetScale(1.5)
 CastingBarFrame:SetFrameStrata("LOW")
 --CastingBarFrame:Lower()
 
