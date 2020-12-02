@@ -258,16 +258,26 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
 end)
 
 local PowerTypes = { -- name, is combo point
-  [0] = {"MANA", false, primary = true},
-  [1] = {"RAGE", false, primary = true},
-  [2] = {"FOCUS", false, primary = true},
-  [3] = {"ENERGY", false, primary = true},
+  [0] = {"MANA", primary = true},
+  [1] = {"RAGE", primary = true},
+  [2] = {"FOCUS", primary = true},
+  [3] = {"ENERGY", primary = true},
   [4] = {"COMBO_POINTS", true},
   [5] = {"RUNES", true},
   [7] = {"SOUL_SHARDS", true},
+  [8] = {"LUNAR_POWER"}, -- astral power
   [9] = {"HOLY_POWER", true},
+  [11] = {"MAELSTROM"},
   [12] = {"CHI", true},
+  [13] = {"INSANITY"},
+  [16] = {"ARCANE_CHARGES", true},
+  [17] = {"FURY", primary = true},
+  [18] = {"PAIN", primary = true}, -- no longer exists but whatever
   --
+}
+
+local PowerTypeOverride = {
+  DRUID_2 = {3, 4}, -- feral druid
 }
 
 local function powerStats(u, i) -- 1-index
@@ -290,7 +300,7 @@ end
 
 function ui.playerHud:setupForSpec()
   local classDisplayName, className, classId = UnitClass("player")
-  local specId = GetActiveSpecGroup()
+  local specId = GetSpecialization()
   
   local bpi = 24
   local bpos = bpi
@@ -314,6 +324,17 @@ function ui.playerHud:setupForSpec()
       if foundPrimary and foundSecondary then break end
     end
   end
+  
+  local pto = PowerTypeOverride[className .. "_" .. specId]
+  if pto then
+    if pto[1] then self.powerType = powerTypeStats("player", pto[1]) end
+    if pto[2] then self.powerType2 = powerTypeStats("player", pto[2]) end
+  end
+  
+  if self.powerType2 and self.powerType2.type == self.powerType.type then self.powerType2 = nil end -- no double bar
+  
+  --print("primary:" .. (self.powerType and self.powerType.type or "none"))
+  --print("secondary:" .. (self.powerType2 and self.powerType2.type or "none"))
   
   if self.powerType then
     self.powerBar:Show()
