@@ -279,11 +279,11 @@ local PowerTypes = { -- name, is combo point
 local PowerTypeOverride = {
   DRUID_1 = {0, 8}, -- balance
   DRUID_2 = {3, 4}, -- feral druid
-  DRUID_3 = {1, false} -- guardian druid
-  DRUID_4 = {0, false} -- resto druid
+  DRUID_3 = {1, false}, -- guardian druid
+  DRUID_4 = {0, false}, -- resto druid
 }
 
-local function powerStats(u, i) -- 1-index
+local function powerStatsOld(u, i) -- 1-index
   local n, pt, r, g, b = UnitPowerType(u or "player", i)
   if not pt then return nil end
   if not r then
@@ -300,6 +300,11 @@ local function powerTypeStats(u, id)
   if not pt then return nil end
   local pc = PowerBarColor[pt[1]] or {r = 0, g = 255, b = 255}
   return { id = id, type = pt[1], isCombo = pt[2], color = {pc.r, pc.g, pc.b}, isPrimary = pt.primary }
+end
+
+local function powerStats(u, i)
+  local n = UnitPowerType(u or "player", i)
+  return powerTypeStats(u, n)
 end
 
 function ui.playerHud:setupForSpec()
