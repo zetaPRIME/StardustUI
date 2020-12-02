@@ -283,16 +283,6 @@ local PowerTypeOverride = {
   DRUID_4 = {0, false}, -- resto druid
 }
 
-local function powerStatsOld(u, i) -- 1-index
-  local n, pt, r, g, b = UnitPowerType(u or "player", i)
-  if not pt then return nil end
-  if not r then
-    local pc = PowerBarColor[pt]
-    r, g, b = pc.r, pc.g, pc.b
-  end
-  return { id = n, type = pt, color = {r, g, b} }
-end
-
 local function powerTypeStats(u, id)
   if id == false then return nil end
   if UnitPowerMax(u or "player", id) <= 0 then return nil end
