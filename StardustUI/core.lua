@@ -217,11 +217,14 @@ end
 ui.playerHud:SetScript("onUpdate", function(self, dt)
   setupCVars() -- fuck it, sledgehammer
   
+  local healthProportion = UnitHealth("player") / UnitHealthMax("player")
+  
   local targetAlpha = 0
   if UnitExists("target")
     and UnitCanAttack("player", "target")
     and not UnitIsDead("target")
     then targetAlpha = 0.5 end
+  if healthProportion < 0.9 then targetAlpha = 0.5 end
   if UnitAffectingCombat("player") then targetAlpha = 1 end
   
   self.alpha = self.alpha or targetAlpha
@@ -234,7 +237,7 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     self:SetScale(scale)
     self:SetWidth(2 * (150 + 250 * (1 - self.alpha^0.1)) / scale)
     
-    self.healthBar:SetValue(UnitHealth("player") / UnitHealthMax("player"))
+    self.healthBar:SetValue(healthProportion)
     if self.powerType then
       self.powerBar:SetValue(UnitPower("player", self.powerType.id) / UnitPowerMax("player", self.powerType.id))
     end
