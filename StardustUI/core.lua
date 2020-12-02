@@ -254,7 +254,11 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
   
 end)
 
-local SecondaryPowerTypes = { -- name, is combo point
+local PowerTypes = { -- name, is combo point
+  [0] = {"MANA", false, primary = true},
+  [1] = {"RAGE", false, primary = true},
+  [2] = {"FOCUS", false, primary = true},
+  [3] = {"ENERGY", false, primary = true},
   [4] = {"COMBO_POINTS", true},
   [5] = {"RUNES", true},
   [7] = {"SOUL_SHARDS", true},
@@ -275,13 +279,16 @@ end
 
 local function powerTypeStats(u, id)
   if UnitPowerMax(u or "player", id) <= 0 then return nil end
-  local spt = SecondaryPowerTypes[id]
-  if not spt then return nil end
-  local pc = PowerBarColor[spt[1]] or {r = 0, g = 255, b = 255}
-  return { id = id, type = spt[1], isCombo = spt[2], color = {pc.r, pc.g, pc.b} }
+  local pt = PowerTypes[id]
+  if not pt then return nil end
+  local pc = PowerBarColor[pt[1]] or {r = 0, g = 255, b = 255}
+  return { id = id, type = pt[1], isCombo = pt[2], color = {pc.r, pc.g, pc.b}, isPrimary = pt.primary }
 end
 
 function ui.playerHud:setupForSpec()
+  local classDisplayName, className, classId = UnitClass("player")
+  local specId = GetActiveSpecGroup()
+  
   local bpi = 24
   local bpos = bpi
   self.powerBar:Hide()
@@ -289,9 +296,20 @@ function ui.playerHud:setupForSpec()
   
   self.powerType = powerStats("player", 1)
   self.powerType2 = nil
-  for k, v in pairs(SecondaryPowerTypes) do
+  
+  local foundPrimary, foundSecondary
+  for k, v in pairs(PowerTypes) do
     local ps = powerTypeStats("player", k)
-    if ps then --[[print(ps.type)]] self.powerType2 = ps break end
+    if ps then
+      if ps.isPrimary then
+        self.powerType = ps
+        foundPrimary = true
+      elseif not foundSecondary then
+        self.powerType2 = ps
+        foundSecondary = true
+      end
+      if foundPrimary and foundSecondary then break end
+    end
   end
   
   if self.powerType then
