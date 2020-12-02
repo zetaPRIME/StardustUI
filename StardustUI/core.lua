@@ -277,7 +277,10 @@ local PowerTypes = { -- name, is combo point
 }
 
 local PowerTypeOverride = {
+  DRUID_1 = {0, 8}, -- balance
   DRUID_2 = {3, 4}, -- feral druid
+  DRUID_3 = {1, false} -- guardian druid
+  DRUID_4 = {0, false} -- resto druid
 }
 
 local function powerStats(u, i) -- 1-index
@@ -291,6 +294,7 @@ local function powerStats(u, i) -- 1-index
 end
 
 local function powerTypeStats(u, id)
+  if id == false then return nil end
   if UnitPowerMax(u or "player", id) <= 0 then return nil end
   local pt = PowerTypes[id]
   if not pt then return nil end
@@ -310,12 +314,12 @@ function ui.playerHud:setupForSpec()
   self.powerType = powerStats("player", 1)
   self.powerType2 = nil
   
-  local foundPrimary, foundSecondary
+  local foundPrimary, foundSecondary = true, false
   for k, v in pairs(PowerTypes) do
     local ps = powerTypeStats("player", k)
     if ps then
       if ps.isPrimary then
-        self.powerType = ps
+        --self.powerType = ps
         foundPrimary = true
       elseif not foundSecondary then
         self.powerType2 = ps
@@ -327,8 +331,8 @@ function ui.playerHud:setupForSpec()
   
   local pto = PowerTypeOverride[className .. "_" .. specId]
   if pto then
-    if pto[1] then self.powerType = powerTypeStats("player", pto[1]) end
-    if pto[2] then self.powerType2 = powerTypeStats("player", pto[2]) end
+    if pto[1] ~= nil then self.powerType = powerTypeStats("player", pto[1]) end
+    if pto[2] ~= nil then self.powerType2 = powerTypeStats("player", pto[2]) end
   end
   
   if self.powerType2 and self.powerType2.type == self.powerType.type then self.powerType2 = nil end -- no double bar
