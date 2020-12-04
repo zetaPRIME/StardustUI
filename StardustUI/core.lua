@@ -160,7 +160,7 @@ CastingBarFrame:SetParent(ui.playerSurround)
 CastingBarFrame:ClearAllPoints()
 CastingBarFrame:SetPoint("CENTER", ui.playerSurround, "CENTER", 0, -110)
 CastingBarFrame:SetScale(1.5)
-CastingBarFrame:SetFrameStrata("LOW")
+--CastingBarFrame:SetFrameStrata("LOW")
 --CastingBarFrame:Lower()
 
 do
@@ -220,11 +220,11 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
   local healthProportion = UnitHealth("player") / UnitHealthMax("player")
   
   local targetAlpha = 0
+  if healthProportion < 0.75 then targetAlpha = 0.3 end
   if UnitExists("target")
     and UnitCanAttack("player", "target")
     and not UnitIsDead("target")
     then targetAlpha = 0.5 end
-  if healthProportion < 0.9 then targetAlpha = 0.5 end
   if UnitAffectingCombat("player") then targetAlpha = 1 end
   
   self.alpha = self.alpha or targetAlpha
