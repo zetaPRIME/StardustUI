@@ -1,0 +1,6 @@
+## Interface: 80300
+## Title: Spectral
+## Author: Zithia Satazaki
+## Version: 0.01
+
+core.lua
