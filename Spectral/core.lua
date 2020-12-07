@@ -3,29 +3,32 @@ local Spectral = Spectral
 
 local macros = { }
 Spectral.macros = macros
+local fragments = { }
+Spectral.fragments = fragments
 
 local processingMacro
-
 local lastFragment = 0
 local fragmentPool = { }
 
 -- grab a fragment from the pool if it contains any, or initialize one if not
 local function getFragment()
-  local frag
-  for k in pairs(fragmentPool) do frag = k break end
-  if frag then fragmentPool[frag] = nil else
+  local f
+  for k in pairs(fragmentPool) do f = k break end
+  if f then fragmentPool[f] = nil else
     local name = "SPXf" .. lastFragment
     lastFragment = lastFragment + 1
     
-    frag = CreateFrame("Button", name, nil, "SecureActionButtonTemplate,SecureHandlerBaseTemplate")
-    frag.fragmentId = name
-    frag:Hide()
-    frag:SetAttribute("type", "macro")
+    f = CreateFrame("Button", name, nil, "SecureActionButtonTemplate,SecureHandlerBaseTemplate")
+    f.fragmentId = name
+    f:Hide()
+    f:SetAttribute("type", "macro")
     
+    fragments[name] = f
   end
-  -- TODO: autoassign
+  -- autoassign if operating on a macro
+  if processingMacro then processingMacro.fragments[f] = true end
   
-  return frag
+  return f
 end
 
 -- return a fragment to the pool
@@ -68,7 +71,7 @@ local function processFragment(inp)
   return f
 end
 
-do
+do -- branch ops
   local bp = { }
   local bmt = {__index = bp}
   
@@ -97,7 +100,39 @@ do
     
     return self
   end
+  bmt.__call = bp.branch
   
+end
+
+do -- macro ops
+  local mp = { }
+  local mmt = {__index = mp}
+  
+  function Spectral.createMacro(name, func)
+    if type(name) ~= "string" then return end
+    local m = setmetatable({ }, mmt)
+    m.name = name
+    m.buildFunc = func
+    m:reinit()
+    macros[name] = m
+    
+    return m
+  end
+  
+  function mp:reinit()
+    if self.fragments then
+      for f in pairs(self.fragments) do collectFragment(f) end
+    end
+    self.fragments = { }
+    self.initialFragment = nil
+  end
+  
+  function mp:rebuild()
+    self:reinit() -- reset fragments
+    processingMacro = self
+    self.initialFragment = processFragment(self:buildFunc())
+    processingMacro = nil
+  end
 end
 
 
@@ -105,21 +140,26 @@ end
 
 
 C_Timer.After(1, function()
+  local branch = Spectral.branch
   local sf = getFragment()
   
-  local f = processFragment {
-    "/dismount", "/leavevehicle [canexitvehicle]",
-    Spectral.branch { c = "[outdoors,noform:3,nocombat]",
-      "/cast !Travel Form"
-    }:branch { c = "[spec:3,noform:1]",
-      "/cast !Bear Form"
-    }:branch {
-      "/cancelform [noform:2]",
-      "/cast [nocombat]!Prowl",
-      "/cast [nostealth,noform:2]!Cat Form"
+  local m = Spectral.createMacro("Mount", function()
+    return {
+      "/run print(\"macro test\")",
+      "/dismount", "/leavevehicle [canexitvehicle]",
+      branch { c = "[outdoors,noform:3,nocombat]",
+        "/cast !Travel Form"
+      } { c = "[spec:3,noform:1]",
+        "/cast !Bear Form"
+      } {
+        "/cancelform [noform:2]",
+        "/cast [nocombat]!Prowl",
+        "/cast [nostealth,noform:2]!Cat Form"
+      }
     }
-  }
+  end)
+  m:rebuild()
   
-  sf:SetAttribute("macrotext", "/click " .. f.fragmentId)
-  print(f.fragmentId)
+  sf:SetAttribute("macrotext", "/click " .. m.initialFragment.fragmentId)
+  --print(f.fragmentId)
 end)
