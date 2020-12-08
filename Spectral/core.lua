@@ -132,7 +132,35 @@ do -- macro ops
     processingMacro = self
     self.initialFragment = processFragment(self:buildFunc())
     processingMacro = nil
+    self:updateBackingMacro()
+    return self
   end
+  
+  function mp:findBackingMacro()
+    if self.backingMacro then return end
+    local search = table.concat {"#SPX ", self.name}
+    local sl = string.len(search)
+    local global, char = GetNumMacros()
+    for i=1,120+char do
+      if i <= 120 and i > global then i = 121 end
+      if string.sub(GetMacroBody(i), 1, sl) == search then
+        self.backingMacro = i
+        return i
+      end
+    end
+  end
+  
+  function mp:updateBackingMacro()
+    self:findBackingMacro()
+    if self.backingMacro then
+      -- icon 134400 is the magic ?
+      EditMacro(self.backingMacro, self.displayName or self.name, self.icon or 134400, table.concat {
+        "#SPX ", self.name, "\n#showtooltip\n/click ", self.initialFragment.fragmentId
+      })
+    end
+  end
+  
+  --
 end
 
 
@@ -141,7 +169,6 @@ end
 
 C_Timer.After(1, function()
   local branch = Spectral.branch
-  local sf = getFragment()
   
   local m = Spectral.createMacro("Mount", function()
     return {
@@ -159,7 +186,5 @@ C_Timer.After(1, function()
     }
   end)
   m:rebuild()
-  
-  sf:SetAttribute("macrotext", "/click " .. m.initialFragment.fragmentId)
   --print(f.fragmentId)
 end)
