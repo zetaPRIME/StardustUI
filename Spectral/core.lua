@@ -152,7 +152,7 @@ do -- macro ops
   function mp:rebuild()
     self:reinit() -- reset fragments
     processingMacro = self
-    self.initialFragment = processFragment(self:buildFunc())
+    self.initialFragment = processFragment(self:buildFunc() or { })
     processingMacro = nil
     self:updateBackingMacro()
     return self
@@ -211,7 +211,7 @@ function Spectral.queueUpdate(...)
   
   for _, r in pairs(a) do updateReasons[r] = true end
   
-  if not InCombatLockdown() then doUpdate() end
+  if not InCombatLockdown() then C_Timer.After(0.05, doUpdate) end
 end
 
 -- queue initial update
@@ -219,3 +219,13 @@ C_Timer.After(0.1, function() Spectral.queueUpdate "default" end)
 
 -- process queued updates on leaving combat
 function baseFrame.events.PLAYER_REGEN_ENABLED() doUpdate() end
+
+do -- default update events
+  local function qdu() Spectral.queueUpdate "default" end
+  baseFrame.events.PLAYER_SPECIALIZATION_CHANGED = qdu
+  baseFrame.events.PLAYER_LEVEL_UP = qdu
+end
+
+-- other reasons
+function baseFrame.events.ZONE_CHANGED_NEW_AREA() C_Timer.After(0.5, function() Spectral.queueUpdate "zone" end) end
+--baseFrame.events.PLAYER_ENTERING_WORLD = 

@@ -12,3 +12,11 @@ function Spectral.isSpell(...)
   local name, rank, icon, castTime, minR, maxR, spellId = GetSpellInfo(...)
   return not not spellId
 end
+
+function Spectral.getPlayerData()
+  local pd = { }
+  pd.classDisplayName, pd.className, pd.classId = UnitClass("player")
+  pd.specId = GetSpecialization()
+  
+  return pd
+end
