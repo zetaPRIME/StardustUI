@@ -1,11 +1,26 @@
 Spectral = { }
 local Spectral = Spectral
 
+-- public tables
 local macros = { }
 Spectral.macros = macros
 local fragments = { }
 Spectral.fragments = fragments
 
+-- set up base frame
+local baseFrame = CreateFrame("Frame")
+baseFrame:Hide()
+baseFrame.events = setmetatable({ }, {
+  __newindex = function(table, key, value)
+    rawset(table, key, value)
+    f:RegisterEvent(string.upper(key))
+  end
+})
+baseFrame:SetScript("onEvent", function(self, event, ...)
+  if self.events[event] then self.events[event](self, ...) end
+end)
+
+-- fragment works
 local processingMacro
 local lastFragment = 0
 local fragmentPool = { }
@@ -18,7 +33,7 @@ local function getFragment()
     local name = "SPXf" .. lastFragment
     lastFragment = lastFragment + 1
     
-    f = CreateFrame("Button", name, nil, "SecureActionButtonTemplate,SecureHandlerBaseTemplate")
+    f = CreateFrame("Button", name, baseFrame, "SecureActionButtonTemplate,SecureHandlerBaseTemplate")
     f.fragmentId = name
     f:Hide()
     f:SetAttribute("type", "macro")
@@ -113,10 +128,17 @@ do -- macro ops
     local m = setmetatable({ }, mmt)
     m.name = name
     m.buildFunc = func
+    m.updateReasons = { default = true }
     m:reinit()
     macros[name] = m
     
     return m
+  end
+  
+  function mp:updatesOn(...)
+    local a = {...}
+    for _, r in pairs(a) do self.updateReasons[r] = true end
+    return self
   end
   
   function mp:reinit()
@@ -163,28 +185,37 @@ do -- macro ops
   --
 end
 
-
-
-
-
-C_Timer.After(1, function()
-  local branch = Spectral.branch
+local updateReasons
+local function doUpdate()
+  if InCombatLockdown() -- wait for leaving combat event
+    or not updateReasons -- update already done
+    then return end
   
-  local m = Spectral.createMacro("Mount", function()
-    return {
-      "/run print(\"macro test\")",
-      "/dismount", "/leavevehicle [canexitvehicle]",
-      branch { c = "[outdoors,noform:3,nocombat]",
-        "/cast !Travel Form"
-      } { c = "[spec:3,noform:1]",
-        "/cast !Bear Form"
-      } {
-        "/cancelform [noform:2]",
-        "/cast [nocombat]!Prowl",
-        "/cast [nostealth,noform:2]!Cat Form"
-      }
-    }
-  end)
-  m:rebuild()
-  --print(f.fragmentId)
-end)
+  -- scan through macros, rebuild for given reasons
+  for _, m in pairs(macros) do
+    local shouldUpdate = not m.initialFragment
+    if not shouldUpdate then -- find reasons
+      for r in pairs(updateReasons) do
+        if m.updateReasons[r] then shouldUpdate = true break end
+      end
+    end
+    if shouldUpdate then m:rebuild() end
+  end
+  
+  updateReasons = nil
+end
+
+function Spectral.queueUpdate(...)
+  local a = {...}
+  updateReasons = updateReasons or { }
+  
+  for _, r in pairs(a) do updateReasons[r] = true end
+  
+  if not InCombatLockdown() then doUpdate() end
+end
+
+-- queue initial update
+C_Timer.After(0.1, function() Spectral.queueUpdate "default" end)
+
+-- process queued updates on leaving combat
+function baseFrame.events.PLAYER_REGEN_ENABLED() doUpdate() end
