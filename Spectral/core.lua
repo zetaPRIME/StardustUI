@@ -13,7 +13,7 @@ baseFrame:Hide()
 baseFrame.events = setmetatable({ }, {
   __newindex = function(table, key, value)
     rawset(table, key, value)
-    f:RegisterEvent(string.upper(key))
+    baseFrame:RegisterEvent(string.upper(key))
   end
 })
 baseFrame:SetScript("onEvent", function(self, event, ...)
@@ -193,7 +193,7 @@ local function doUpdate()
   
   -- scan through macros, rebuild for given reasons
   for _, m in pairs(macros) do
-    local shouldUpdate = not m.initialFragment
+    local shouldUpdate = not m.initialFragment -- always update if not built
     if not shouldUpdate then -- find reasons
       for r in pairs(updateReasons) do
         if m.updateReasons[r] then shouldUpdate = true break end
