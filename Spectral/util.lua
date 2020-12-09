@@ -15,8 +15,10 @@ end
 
 function Spectral.getPlayerData()
   local pd = { }
+  local _
   pd.classDisplayName, pd.className, pd.classId = UnitClass("player")
   pd.specId = GetSpecialization()
+  _, pd.race = UnitRace("player")
   
   return pd
 end

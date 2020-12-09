@@ -54,7 +54,9 @@ local function collectFragment(f)
   f.ttg = { }
 end
 
-function tok(s) return string.match(s,"(%S+)(.+)") end
+function tok(s)
+  return string.match(s,"(%S+)%s+(.+)")
+end
 
 local charLimit = 1022 - string.len("/click SPXf12345678")
 local function processFragment(inp)
@@ -71,23 +73,29 @@ local function processFragment(inp)
       end
     end
     
-    local cmd = tok(line)
+    local cmd, par = tok(line)
     
-    if cmd == "/cast" or cmd == "/click" or cmd == "/use" or cmd == "#show" or cmd == "#showtooltip" then
-      table.insert(f.ttg, line)
-    end
-    
-    local lcc = string.len(line) + 1
-    if cc + lcc > charLimit then
-      local xf = getFragment() -- extend fragment
-      table.insert(acc, "/click ")
-      table.insert(acc, xf.fragmentId)
+    if string.sub(line, 1, 1) == "@" then -- essentially a preprocessor declaration
+      if cmd == "@name" then
+        if processingMacro then processingMacro.displayName = par end
+      end
+    else -- normal line
+      if cmd == "/cast" or cmd == "/click" or cmd == "/use" or cmd == "#show" or cmd == "#showtooltip" then
+        table.insert(f.ttg, line)
+      end
       
-      cf:SetAttribute("macrotext", table.concat(acc))
-      acc = { } cc = 0 cf = xf
-    else
-      cc = cc + lcc
-      table.insert(acc, line) table.insert(acc, "\n")
+      local lcc = string.len(line) + 1
+      if cc + lcc > charLimit then
+        local xf = getFragment() -- extend fragment
+        table.insert(acc, "/click ")
+        table.insert(acc, xf.fragmentId)
+        
+        cf:SetAttribute("macrotext", table.concat(acc))
+        acc = { } cc = 0 cf = xf
+      else
+        cc = cc + lcc
+        table.insert(acc, line) table.insert(acc, "\n")
+      end
     end
   end
   
@@ -157,6 +165,8 @@ do -- macro ops
     end
     self.fragments = { }
     self.initialFragment = nil
+    self.displayName = nil
+    self.icon = nil
   end
   
   function mp:rebuild()
@@ -169,13 +179,21 @@ do -- macro ops
   end
   
   function mp:findBackingMacro()
-    if self.backingMacro then return end
-    local search = table.concat {"#SPX ", self.name}
+    local search = table.concat {"#SPX ", self.name, "\n"}
     local sl = string.len(search)
-    local global, char = GetNumMacros()
-    for i=1,120+char do
-      if i <= 120 and i > global then i = 121 end
-      if string.sub(GetMacroBody(i), 1, sl) == search then
+    if self.backingMacro then -- confirm
+      local body = GetMacroBody(self.backingMacro)
+      if body and string.sub(body, 1, sl) == search then
+        return
+      end
+      self.backingMacro = nil -- if no match, rescan
+    end
+    --local global, char = GetNumMacros()
+    for i=1,138 do
+      --if i <= 120 and i > global then i = 121 end
+      local body = GetMacroBody(i)
+      if body then body = body .. "\n" end -- append searched newline to find SPX tag alone
+      if body and string.sub(body, 1, sl) == search then
         self.backingMacro = i
         return i
       end
@@ -213,6 +231,7 @@ do -- macro ops
     local fi = fragmentIcon(self.initialFragment)
     --if fi then print("icon result: " .. fi) end
     if fi then
+      if string.sub(fi, 1, 1) == "!" then fi = string.sub(fi, 2, -1) end
       if Spectral.isSpell(fi) then
         SetMacroSpell(self.backingMacro, fi)
       else
@@ -226,11 +245,15 @@ do -- macro ops
   --
 end
 
+local updatingMacros = false
+
 local updateReasons
 local function doUpdate()
   if InCombatLockdown() -- wait for leaving combat event
     or not updateReasons -- update already done
     then return end
+  
+  updatingMacros = true
   
   -- scan through macros, rebuild for given reasons
   for _, m in pairs(macros) do
@@ -244,6 +267,7 @@ local function doUpdate()
   end
   
   updateReasons = nil
+  updatingMacros = false
 end
 
 function Spectral.queueUpdate(...)
@@ -265,6 +289,13 @@ do -- default update events
   local function qdu() Spectral.queueUpdate "default" end
   baseFrame.events.PLAYER_SPECIALIZATION_CHANGED = qdu
   baseFrame.events.PLAYER_LEVEL_UP = qdu
+  baseFrame.events.UPDATE_MACROS = function()
+    --print ("UPDATE_MACROS; " .. (updatingMacros and "true" or "false"))
+    if not updatingMacros then
+      for _, m in pairs(macros) do m.backingMacro = nil end
+      Spectral.queueUpdate "default"
+    end
+  end
 end
 
 -- other reasons
