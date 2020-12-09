@@ -302,7 +302,34 @@ end
 function baseFrame.events.ZONE_CHANGED_NEW_AREA() C_Timer.After(0.5, function() Spectral.queueUpdate "zone" end) end
 --baseFrame.events.PLAYER_ENTERING_WORLD = 
 
-
-C_Timer.NewTicker(0.1, function()
-  for _, m in pairs(macros) do m:updateIcon() end
-end)
+do -- icon updater, matching SecureStateDriver update schedule
+  local iconUpdateFrame = CreateFrame("Frame")
+  local timer = 0
+  
+  iconUpdateFrame:SetScript("OnUpdate", function(self, dt)
+    timer = timer - dt
+    if timer > 0 then return end
+    
+    timer = 0.2
+    for _, m in pairs(macros) do m:updateIcon() end
+  end)
+  
+  iconUpdateFrame:SetScript("OnEvent", function(self, event)
+    timer = 0 -- kick update
+  end)
+  
+  for _, e in pairs { -- set events for immediate update
+    "MODIFIER_STATE_CHANGED",
+    "ACTIONBAR_PAGE_CHANGED",
+    "UPDATE_BONUS_ACTIONBAR",
+    "PLAYER_ENTERING_WORLD",
+    "UPDATE_SHAPESHIFT_FORM",
+    "UPDATE_STEALTH",
+    "PLAYER_TARGET_CHANGED",
+    "PLAYER_FOCUS_CHANGED",
+    "PLAYER_REGEN_DISABLED",
+    "PLAYER_REGEN_ENABLED",
+    "UNIT_PET",
+    "GROUP_ROSTER_UPDATE",
+  } do iconUpdateFrame:RegisterEvent(e) end
+end
