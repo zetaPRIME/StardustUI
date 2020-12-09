@@ -264,6 +264,7 @@ local PowerTypes = { -- name, is combo point
   [3] = {"ENERGY", primary = true},
   [4] = {"COMBO_POINTS", true},
   [5] = {"RUNES", true},
+  [6] = {"RUNIC_POWER", primary = true},
   [7] = {"SOUL_SHARDS", true},
   [8] = {"LUNAR_POWER"}, -- astral power
   [9] = {"HOLY_POWER", true},
@@ -277,10 +278,10 @@ local PowerTypes = { -- name, is combo point
 }
 
 local PowerTypeOverride = {
-  DRUID_1 = {0, 8}, -- balance
-  DRUID_2 = {3, 4}, -- feral druid
-  DRUID_3 = {1, false}, -- guardian druid
-  DRUID_4 = {0, false}, -- resto druid
+  DRUID1 = {0, 8}, -- balance
+  DRUID2 = {3, 4}, -- feral druid
+  DRUID3 = {1, false}, -- guardian druid
+  DRUID4 = {0, false}, -- resto druid
 }
 
 local function powerTypeStats(u, id)
@@ -324,13 +325,13 @@ function ui.playerHud:setupForSpec()
     end
   end
   
-  local pto = PowerTypeOverride[className .. "_" .. specId]
+  local pto = PowerTypeOverride[className .. specId]
   if pto then
     if pto[1] ~= nil then self.powerType = powerTypeStats("player", pto[1]) end
     if pto[2] ~= nil then self.powerType2 = powerTypeStats("player", pto[2]) end
   end
   
-  if self.powerType2 and self.powerType2.type == self.powerType.type then self.powerType2 = nil end -- no double bar
+  if self.powerType and self.powerType2 and self.powerType2.type == self.powerType.type then self.powerType2 = nil end -- no double bar
   
   --print("primary:" .. (self.powerType and self.powerType.type or "none"))
   --print("secondary:" .. (self.powerType2 and self.powerType2.type or "none"))
