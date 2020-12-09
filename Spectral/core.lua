@@ -188,9 +188,7 @@ do -- macro ops
       end
       self.backingMacro = nil -- if no match, rescan
     end
-    --local global, char = GetNumMacros()
     for i=1,138 do
-      --if i <= 120 and i > global then i = 121 end
       local body = GetMacroBody(i)
       if body then body = body .. "\n" end -- append searched newline to find SPX tag alone
       if body and string.sub(body, 1, sl) == search then
@@ -203,7 +201,6 @@ do -- macro ops
   function mp:updateBackingMacro()
     self:findBackingMacro()
     if self.backingMacro then
-      -- icon 134400 is the magic ?
       EditMacro(self.backingMacro, self.displayName or self.name, self.icon or "INV_Misc_QuestionMark", table.concat {
         "#SPX ", self.name, "\n#showtooltip\n/click ", self.initialFragment.fragmentId
       })
@@ -292,7 +289,10 @@ do -- default update events
   baseFrame.events.UPDATE_MACROS = function()
     --print ("UPDATE_MACROS; " .. (updatingMacros and "true" or "false"))
     if not updatingMacros then
-      for _, m in pairs(macros) do m.backingMacro = nil end
+      for _, m in pairs(macros) do
+        m.backingMacro = nil
+        m:findBackingMacro()
+      end
       Spectral.queueUpdate "default"
     end
   end
