@@ -37,6 +37,7 @@ local function getFragment()
     f.fragmentId = name
     f:Hide()
     f:SetAttribute("type", "macro")
+    f.ttg = { }
     
     fragments[name] = f
   end
@@ -50,7 +51,10 @@ end
 local function collectFragment(f)
   fragmentPool[f] = true
   f:SetAttribute("macrotext", "") -- maybe free some memory
+  f.ttg = { }
 end
+
+function tok(s) return string.match(s,"(%S+)(.+)") end
 
 local charLimit = 1022 - string.len("/click SPXf12345678")
 local function processFragment(inp)
@@ -65,6 +69,12 @@ local function processFragment(inp)
       if line[1] then
         line = table.concat(line)
       end
+    end
+    
+    local cmd = tok(line)
+    
+    if cmd == "/cast" or cmd == "/click" or cmd == "/use" or cmd == "#show" or cmd == "#showtooltip" then
+      table.insert(f.ttg, line)
     end
     
     local lcc = string.len(line) + 1
@@ -176,9 +186,40 @@ do -- macro ops
     self:findBackingMacro()
     if self.backingMacro then
       -- icon 134400 is the magic ?
-      EditMacro(self.backingMacro, self.displayName or self.name, self.icon or 134400, table.concat {
+      EditMacro(self.backingMacro, self.displayName or self.name, self.icon or "INV_Misc_QuestionMark", table.concat {
         "#SPX ", self.name, "\n#showtooltip\n/click ", self.initialFragment.fragmentId
       })
+    end
+  end
+  
+  local function fragmentIcon(f)
+    local sp
+    for _, l in pairs(f.ttg) do
+      local c, p = tok(l)
+      local r = SecureCmdOptionParse(p)
+      if c == "/click" then
+        if r and fragments[r] then
+          local s = fragmentIcon(fragments[r])
+          if s then return s end
+        end
+      else
+        if r then return r end
+      end
+    end
+  end
+  
+  function mp:updateIcon()
+    if not self.backingMacro or not self.initialFragment then return end
+    local fi = fragmentIcon(self.initialFragment)
+    --if fi then print("icon result: " .. fi) end
+    if fi then
+      if Spectral.isSpell(fi) then
+        SetMacroSpell(self.backingMacro, fi)
+      else
+        SetMacroItem(self.backingMacro, fi)
+      end
+    else
+      SetMacroSpell(self.backingMacro, "") -- blank
     end
   end
   
@@ -229,3 +270,8 @@ end
 -- other reasons
 function baseFrame.events.ZONE_CHANGED_NEW_AREA() C_Timer.After(0.5, function() Spectral.queueUpdate "zone" end) end
 --baseFrame.events.PLAYER_ENTERING_WORLD = 
+
+
+C_Timer.NewTicker(0.1, function()
+  for _, m in pairs(macros) do m:updateIcon() end
+end)
