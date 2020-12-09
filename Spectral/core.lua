@@ -78,6 +78,8 @@ local function processFragment(inp)
     if string.sub(line, 1, 1) == "@" then -- essentially a preprocessor declaration
       if cmd == "@name" then
         if processingMacro then processingMacro.displayName = par end
+      elseif cmd == "@icon" then
+        if processingMacro then processingMacro.icon = par end
       end
     else -- normal line
       if cmd == "/cast" or cmd == "/click" or cmd == "/use" or cmd == "#show" or cmd == "#showtooltip" then
@@ -242,6 +244,8 @@ do -- macro ops
   --
 end
 
+function Spectral.getProcessingMacro() return processingMacro end
+
 local updatingMacros = false
 
 local updateReasons
@@ -277,13 +281,14 @@ function Spectral.queueUpdate(...)
 end
 
 -- queue initial update
-C_Timer.After(0.1, function() Spectral.queueUpdate "default" end)
+--C_Timer.After(0.1, function() Spectral.queueUpdate "default" end)
 
 -- process queued updates on leaving combat
 function baseFrame.events.PLAYER_REGEN_ENABLED() doUpdate() end
 
 do -- default update events
   local function qdu() Spectral.queueUpdate "default" end
+  baseFrame.events.PLAYER_ENTERING_WORLD = qdu
   baseFrame.events.PLAYER_SPECIALIZATION_CHANGED = qdu
   baseFrame.events.PLAYER_LEVEL_UP = qdu
   baseFrame.events.UPDATE_MACROS = function()
@@ -300,7 +305,6 @@ end
 
 -- other reasons
 function baseFrame.events.ZONE_CHANGED_NEW_AREA() C_Timer.After(0.5, function() Spectral.queueUpdate "zone" end) end
---baseFrame.events.PLAYER_ENTERING_WORLD = 
 
 do -- icon updater, matching SecureStateDriver update schedule
   local iconUpdateFrame = CreateFrame("Frame")

@@ -7,8 +7,6 @@ local m
 m = Spectral.createMacro("Mount", function()
   local pd = Spectral.getPlayerData()
   
-  -- TODO use ghost wolf for shaman
-  
   if pd.className == "DRUID" then
     return {
       "@name Form",
@@ -43,3 +41,20 @@ m = Spectral.createMacro("Mount", function()
   end
 end)
 m:updatesOn "zone" -- can change on entering the maw
+
+m = Spectral.createMacro("Stealth", function()
+  local pd = Spectral.getPlayerData()
+  
+  if pd.className == "DRUID" then
+    return {
+      "/cancelaura Travel Form",
+      "/cast Prowl",
+    }
+  elseif pd.className == "ROGUE" then
+    return {
+      "/cast [combat]Vanish;Stealth",
+    }
+  else
+    return Spectral.inactiveBinding()
+  end
+end)

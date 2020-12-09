@@ -22,3 +22,14 @@ function Spectral.getPlayerData()
   
   return pd
 end
+
+function Spectral.inactiveBinding(name)
+  if not name then
+    m = Spectral.getProcessingMacro()
+    name = m and m.name or ""
+  end
+  return {
+    "@name ~ " .. string.lower(name),
+    "@icon 3565717", -- red X
+  }
+end
