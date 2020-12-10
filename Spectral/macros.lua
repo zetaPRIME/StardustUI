@@ -55,7 +55,13 @@ m = Spectral.createMacro("Mount", function()
       "/dismount", "/leavevehicle [canexitvehicle]",
       branch { c = "[outdoors,noform:3,noharm" .. mc .. cc,
         tfc,
-      } { c = "[spec:4,noform:0]",
+      } (function() -- todo: move the spec branches into build func?
+        if Spectral.spellKnown "Moonkin Form" then
+          return { c = "[spec:1,noform:4]",
+            "/cast !Moonkin Form",
+          }
+        end
+      end) { c = "[spec:4,noform:0]",
         "/cancelform",
       } { c = "[spec:3,noform:1]",
         "/cast !Bear Form",

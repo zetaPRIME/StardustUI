@@ -111,6 +111,13 @@ do -- branch ops
   local bmt = {__index = bp}
   
   function Spectral.branch(t)
+    if type(t) == "function" then t = t() end
+    if not t then -- null branch, hack around it
+      local bt = setmetatable({ }, bmt)
+      table.insert(bt, "/click [pet,nopet]x") -- necessarily false
+      return bt
+    end
+    
     local condition = t.condition or t.c or ""
     t.c = nil t.condition = nil
     
@@ -125,6 +132,9 @@ do -- branch ops
   end
   
   function bp:branch(t)
+    if type(t) == "function" then t = t() end
+    if not t then return self end
+    
     local condition = t.condition or t.c or ""
     t.c = nil t.condition = nil
     
