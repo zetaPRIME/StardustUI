@@ -4,10 +4,34 @@ local branch = Spectral.branch
 
 local m
 
+local normalMount, mawMount
+local mountsList = {
+  "Vulpine Familiar",
+}
+local mawMountsList = {
+  "Corridor Creeper", "Mawsworn Soulhunter", -- known Maw-capable mounts
+  "Running Wild", -- Worgen racial works in the Maw
+}
+local function findMounts()
+  for _, m in pairs(mountsList) do
+    if Spectral.isSpell(m) then
+      normalMount = m
+      break
+    end
+  end
+  
+  for _, m in pairs(mawMountsList) do
+    if Spectral.isSpell(m) then
+      mawMount = m
+      break
+    end
+  end
+end
+
 m = Spectral.createMacro("Mount", function()
   local pd = Spectral.getPlayerData()
   
-  if pd.className == "DRUID" then
+  if pd.className == "DRUID" then -- shapeshift macro
     return {
       "@name Form",
       "/dismount", "/leavevehicle [canexitvehicle]",
@@ -27,15 +51,19 @@ m = Spectral.createMacro("Mount", function()
         "/cast [nostealth,noform:2]!Cat Form"
       }
     }
-  else
+  else -- normal mount
+    if not normalMount then findMounts() end
+    local mount = (GetAreaText() ~= "The Maw") and normalMount or mawMount
+    
     return {
+      "#show " .. mount,
       branch { c = "[nomounted,nocanexitvehicle]",
-        "/cast Vulpine Familiar",
+        "/cast " .. mount,
         (function() if Spectral.spellKnown "Ghost Wolf" then return "/cast Ghost Wolf" end end)(),
       } {
         "/dismount",
         "/leavevehicle [canexitvehicle]",
-        "#show item:142513",
+        --"#show item:142513",
       }
     }
   end
