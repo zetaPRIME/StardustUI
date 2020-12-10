@@ -49,23 +49,26 @@ m = Spectral.createMacro("Mount", function()
     
     local cc = "][outdoors,harm,form:" .. druidCombatForm[pd.specId] .. "]" -- combat condition
     
-    
     return {
       "@name Form",
       "/dismount", "/leavevehicle [canexitvehicle]",
       branch { c = "[outdoors,noform:3,noharm" .. mc .. cc,
         tfc,
-      } (function() -- todo: move the spec branches into build func?
-        if Spectral.spellKnown "Moonkin Form" then
+      } (function() -- only build for our given spec since we're rebuilding on spec switch anyway
+        if pd.specId == 1 and Spectral.spellKnown "Moonkin Form" then
           return { c = "[spec:1,noform:4]",
             "/cast !Moonkin Form",
           }
+        elseif pd.specId == 4 then
+          return { c = "[spec:4,noform:0]",
+            "/cancelform",
+          }
+        elseif pd.specId == 3 then
+          return { c = "[spec:3,noform:1]",
+            "/cast !Bear Form",
+          }
         end
-      end) { c = "[spec:4,noform:0]",
-        "/cancelform",
-      } { c = "[spec:3,noform:1]",
-        "/cast !Bear Form",
-      } {
+      end) {
         "#show Cat Form",
         "/cancelform [noform:2]",
         "/cast [nocombat]!Prowl",
