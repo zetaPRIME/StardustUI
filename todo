@@ -12,5 +12,7 @@ buff tracker
 / crosshair in first person just because
 
 Spectral {
+  add ability to pass in a function to branch-else
+  
   mount macro - use soulshape if available, not channeling and not mounting etc.
 }

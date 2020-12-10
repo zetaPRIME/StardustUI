@@ -28,22 +28,37 @@ local function findMounts()
   end
 end
 
+local druidCombatForm = {
+  4, 2, 1, 0
+}
+
 m = Spectral.createMacro("Mount", function()
   local pd = Spectral.getPlayerData()
   
   if pd.className == "DRUID" then -- shapeshift macro
+    -- travel stuff
+    local mc = "" -- mount condition
+    local tfc = "/cast !Travel Form" -- travel form command
+    if Spectral.spellKnown "Mount Form" then
+      local f = 4
+      if Spectral.spellKnown "Moonkin Form" then f = f + 1 end
+      if Spectral.spellKnown "Treant Form" then f = f + 1 end
+      mc = ",noform:" .. f
+      tfc = "/cast [noflyable,noswimming]!Mount Form;!Travel Form"
+    end
+    
+    local cc = "][outdoors,harm,form:" .. druidCombatForm[pd.specId] .. "]" -- combat condition
+    
+    
     return {
       "@name Form",
       "/dismount", "/leavevehicle [canexitvehicle]",
-      branch { c = "[outdoors,noform:3,nocombat]",
-        (function()
-          if false and Spectral.spellKnown "Mount Form" then
-            return "/cast [noflyable]!Mount Form;!Travel Form"
-          end
-          return "/cast !Travel Form"
-        end)(),
+      branch { c = "[outdoors,noform:3,noharm" .. mc .. cc,
+        tfc,
+      } { c = "[spec:4,noform:0]",
+        "/cancelform",
       } { c = "[spec:3,noform:1]",
-        "/cast !Bear Form"
+        "/cast !Bear Form",
       } {
         "#show Cat Form",
         "/cancelform [noform:2]",
