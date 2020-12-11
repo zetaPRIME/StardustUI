@@ -75,3 +75,16 @@ do
     return IsSpellKnown(ff)
   end
 end
+
+do
+  local zoneMap = {
+    ["Kelp'thar Forest"] = "Vashj'ir",
+    ["Shimmering Expanse"] = "Vashj'ir",
+    ["Abyssal Depths"] = "Vashj'ir",
+  }
+  
+  function Spectral.currentZone()
+    local z = GetAreaText()
+    return zoneMap[z] or z
+  end
+end

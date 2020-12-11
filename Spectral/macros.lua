@@ -80,8 +80,12 @@ m = Spectral.createMacro("Mount", function()
       }
     }
   else -- normal mount
+    local z = Spectral.currentZone()
     if not normalMount then findMounts() end
-    local mount = (GetAreaText() ~= "The Maw") and normalMount or mawMount
+    local mount = (z ~= "The Maw") and normalMount or mawMount
+    if z == "Vashj'ir" and Spectral.isSpell "Vashj'ir Seahorse" then
+      mount = "[swimming]Vashj'ir Seahorse;" .. mount
+    end
     
     return {
       "#show " .. mount,
