@@ -44,7 +44,11 @@ m = Spectral.createMacro("Mount", function()
       if Spectral.spellKnown "Moonkin Form" then f = f + 1 end
       if Spectral.spellKnown "Treant Form" then f = f + 1 end
       mc = ",noform:" .. f
-      tfc = "/cast [noflyable,noswimming]!Mount Form;!Travel Form"
+      if Spectral.zoneIsFlyable() then -- need to hack around the [flyable] condition being broken
+        tfc = "/cast [combat,noswimming]!Mount Form;!Travel Form"
+      else
+        tfc = "/cast [noswimming]!Mount Form;!Travel Form"
+      end
     end
     
     local cc = "][outdoors,harm,form:" .. druidCombatForm[pd.specId] .. "]" -- combat condition

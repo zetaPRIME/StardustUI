@@ -33,3 +33,45 @@ function Spectral.inactiveBinding(name)
     "@icon 3565717", -- red X
   }
 end
+
+do
+  local pf = { -- pathfinder spell list
+    bfa = 278833,
+  }
+  local zoneFlyMap = { -- referenced from LibFlyable
+    -- zones that are always flyable as of Shadowlands prepatch
+    [1116] = true, [1464] = true, -- Draenor and Tanaan Jungle
+    [1152] = true, [1330] = true, [1153] = true, [1154] = true, -- horde garrison
+    [1158] = true, [1331] = true, [1159] = true, [1160] = true, -- alliance garrison
+    [1220] = true, -- Broken Isles
+    
+    -- zones requiring BFA pathfinder
+    [1642] = pf.bfa, -- Zandalar
+    [1643] = pf.bfa, -- Kul Tiras
+    [1718] = pf.bfa, -- Nazjatar
+    
+    -- zones that will require a spell in the future
+    [2222] = false, -- Shadowlands
+    
+    -- zones that aren't flyable despite IsFlyableArea saying otherwise
+    [1669] = false, -- Argus
+    [1463] = false, -- Helheim
+    -- some class halls
+    [1519] = false, -- The Fel Hammer (Demon Hunter)
+    [1514] = false, -- The Wandering Isle (Monk)
+    [1469] = false, -- The Heart of Azeroth (Shaman)
+    [1107] = false, -- Dreadscar Rift (Warlock)
+    [1479] = false, -- Skyhold (Warrior)
+  }
+  
+  function Spectral.zoneIsFlyable()
+    -- no zone is flyable to someone who can't fly yet
+    if not (IsSpellKnown(34090) or IsSpellKnown(34091) or IsSpellKnown(90265)) then return false end
+    
+    local _, _, _, _, _, _, _, instanceID = GetInstanceInfo()
+    local ff = zoneFlyMap[instanceID]
+    if ff == nil then return IsFlyableArea() end
+    if type(ff) == "boolean" then return ff end
+    return IsSpellKnown(ff)
+  end
+end

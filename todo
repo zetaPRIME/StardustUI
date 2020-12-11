@@ -15,4 +15,5 @@ Spectral {
   - add ability to pass in a function to branch-else
   
   mount macro - use soulshape if available, not channeling and not mounting etc.
+  mount macro - use Vashj'ir seahorse mount when underwater in that zone
 }
