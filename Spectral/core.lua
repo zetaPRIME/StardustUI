@@ -268,7 +268,8 @@ local function doUpdate()
   
   -- scan through macros, rebuild for given reasons
   for _, m in pairs(macros) do
-    local shouldUpdate = not m.initialFragment -- always update if not built
+    -- always update if not built (or told to force a rebuild)
+    local shouldUpdate = (not m.initialFragment) or updateReasons.force
     if not shouldUpdate then -- find reasons
       for r in pairs(updateReasons) do
         if m.updateReasons[r] then shouldUpdate = true break end

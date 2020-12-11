@@ -4,7 +4,7 @@ local branch = Spectral.branch
 
 local m
 
-local normalMount, mawMount
+local normalMount, mawMount, aquaticMount
 local mountsList = {
   "Vulpine Familiar",
 }
@@ -12,20 +12,26 @@ local mawMountsList = {
   "Corridor Creeper", "Mawsworn Soulhunter", -- known Maw-capable mounts
   "Running Wild", -- Worgen racial works in the Maw
 }
+local aquaticMountsList = {
+  "Subdued Seahorse", "Saltwater Seahorse", -- Vashj'ir seahorse model
+  "Crimson Tidestallion", "Inkscale Deepseeker", "Fabious", -- tidestallions
+  "Darkwater Skate", "Great Sea Ray", -- rays
+  "Fathom Dweller", "Surf Jelly", "Pond Nettle", -- jellyfeesh
+  
+  "Sea Turtle", "Riding Turtle", -- turtles
+  "Brinedeep Bottom-Feeder", -- the ugly fish
+  
+}
 local function findMounts()
-  for _, m in pairs(mountsList) do
-    if Spectral.isSpell(m) then
-      normalMount = m
-      break
+  local function find(l)
+    for _, m in pairs(l) do
+      if Spectral.isSpell(m) then return m end
     end
   end
   
-  for _, m in pairs(mawMountsList) do
-    if Spectral.isSpell(m) then
-      mawMount = m
-      break
-    end
-  end
+  normalMount = find(mountsList)
+  mawMount = find(mawMountsList)
+  aquaticMount = find(aquaticMountsList)
 end
 
 local druidCombatForm = {
@@ -84,7 +90,9 @@ m = Spectral.createMacro("Mount", function()
     if not normalMount then findMounts() end
     local mount = (z ~= "The Maw") and normalMount or mawMount
     if z == "Vashj'ir" and Spectral.isSpell "Vashj'ir Seahorse" then
-      mount = "[swimming]Vashj'ir Seahorse;" .. mount
+      mount = "[swimming]Vashj'ir Seahorse;" .. mount -- this is faster than other aquatic mounts apparently?
+    elseif aquaticMount then
+      mount = string.format("[swimming]%s;%s", aquaticMount, mount)
     end
     
     return {
