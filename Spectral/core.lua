@@ -319,7 +319,7 @@ function baseFrame.events.ZONE_CHANGED_NEW_AREA() C_Timer.After(0.5, function() 
 
 do -- icon updater, matching SecureStateDriver update schedule
   local iconUpdateFrame = CreateFrame("Frame")
-  local timer = 0
+  local timer = 1 -- build in a delay on load to let things settle
   
   iconUpdateFrame:SetScript("OnUpdate", function(self, dt)
     timer = timer - dt
