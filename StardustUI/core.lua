@@ -66,6 +66,7 @@ ui.playerSurround:SetScript("onUpdate", function(self, dt)
   
   local scaleProp = clamp((zoomAcc-maxScaleZoom) / (minScaleZoom-maxScaleZoom))
   scaleProp = scaleProp ^ 0.5
+  self.scaleProp = scaleProp -- save this for later
   local scale = Lerp(maxScale, minScale, scaleProp)
   self:SetScale(scale)
   
@@ -77,8 +78,7 @@ ui.playerSurround:SetScript("onUpdate", function(self, dt)
   end
   self:Show()
   
-  prd:Hide() -- hide default display
-  prd:SetSize(1, 1)
+  prd:SetAlpha(0) -- don't need to show this
 end)
 
 --[[
@@ -93,6 +93,7 @@ ui.playerSurround.crosshair:Show()
 
 -- handle setting up and reverting cvars
 local function setupCVars()
+  if InCombatLockdown() then return end -- nnnnnope
   SetCVar("nameplatePersonalShowAlways", 1)
   SetCVar("nameplateSelfBottomInset", 0.10)
 end
@@ -116,11 +117,6 @@ function ui.playerSurround.events:NAME_PLATE_UNIT_ADDED(nameplate)
       else
         prd = frame
       end
-      --self:SetParent(prd)
-      prd:EnableMouse(false) -- clickthrough\
-      for _, c in pairs { prd:GetChildren() } do
-        c:SetHeight(0) -- effectively hard disable
-      end
       self:Show()
     else
       prd, zoomAcc = nil
@@ -141,7 +137,7 @@ function ui.playerSurround.events:NAME_PLATE_UNIT_REMOVED(nameplate)
 end
 
 ui.playerHud = ui.createFrame("Frame", "StardustUI:PlayerHUD", ui.playerSurround)
-ui.playerHud:SetHeight(1) ui.playerHud:SetWidth(2*150)
+ui.playerHud:SetHeight(2*120) ui.playerHud:SetWidth(2*150)
 ui.playerHud:SetPoint("CENTER", ui.playerSurround, "CENTER", 0, 0)
 ui.playerHud:Show()
 ui.playerHud:SetAlpha(0.75)
@@ -164,6 +160,11 @@ CastingBarFrame:SetScale(1.5)
 --CastingBarFrame:Lower()
 
 do
+  local buffArea = ui.createFrame("Frame", "StardustUI:PlayerBuffs", ui.playerHud)
+  ui.playerHud.buffArea = buffArea
+  buffArea:SetSize(1, 1)
+  buffArea:SetPoint("CENTER", ui.playerHud, "TOP", 0, 0)
+  
   local healthBar = ui.createFrame("StatusBar", nil, ui.playerHud)
   ui.playerHud.healthBar = healthBar
   healthBar:SetSize(64, 256)
@@ -237,6 +238,9 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     self:SetScale(scale)
     self:SetWidth(2 * (150 + 250 * (1 - self.alpha^0.1)) / scale)
     
+    local bscale = Lerp(1.0, 2.0, clamp(ui.playerSurround.scaleProp or 0))
+    self.buffArea:SetScale(bscale)
+    
     self.healthBar:SetValue(healthProportion)
     if self.powerType then
       self.powerBar:SetValue(UnitPower("player", self.powerType.id) / UnitPowerMax("player", self.powerType.id))
@@ -299,6 +303,10 @@ local function powerStats(u, i)
 end
 
 function ui.playerHud:setupForSpec()
+  if not InCombatLockdown() then
+    C_NamePlate.SetNamePlateSelfClickThrough(true) -- ...
+  end
+  
   local classDisplayName, className, classId = UnitClass("player")
   local specId = GetSpecialization()
   
