@@ -62,7 +62,13 @@ m = Spectral.createMacro("Mount", function()
     return {
       "@name Form",
       "/dismount", "/leavevehicle [canexitvehicle]",
-      branch { c = "[outdoors,noform:3,noharm" .. mc .. cc,
+      branch (function()
+        if pd.specId == 4 then -- resto, moonkin when holding alt
+          return { c = "[spec:4,noform:1,mod:alt]",
+            "/cast !Moonkin Form",
+          }
+        end
+      end) { c = "[outdoors,noform:3,noharm" .. mc .. cc,
         tfc,
       } (function() -- only build for our given spec since we're rebuilding on spec switch anyway
         if pd.specId == 1 and Spectral.spellKnown "Moonkin Form" then
