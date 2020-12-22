@@ -78,7 +78,7 @@ m = Spectral.createMacro("Mount", function()
         elseif pd.specId == 4 then
           return { c = "[spec:4,noform:0]",
             "/cancelform",
-            (Spectral.spellKnown "Treant Form" and "#show Treant Form" or "#show Dreamwalk"),
+            "#show [form:3]Travel Form;Mount Form",
           }
         elseif pd.specId == 3 then
           return { c = "[spec:3,noform:1]",
