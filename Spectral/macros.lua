@@ -95,7 +95,7 @@ m = Spectral.createMacro("Mount", function()
   else -- normal mount
     local z = Spectral.currentZone()
     if not normalMount then findMounts() end
-    local mount = (z ~= "The Maw") and normalMount or mawMount
+    local mount = (z ~= "The Maw") and normalMount or mawMount or ""
     if z == "Vashj'ir" and Spectral.isSpell "Vashj'ir Seahorse" then
       mount = "[swimming,nomod:alt]Vashj'ir Seahorse;" .. mount -- this is faster than other aquatic mounts apparently?
     elseif aquaticMount then
