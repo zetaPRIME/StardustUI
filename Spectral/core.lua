@@ -187,6 +187,7 @@ do -- macro ops
     self.initialFragment = processFragment(self:buildFunc() or { })
     processingMacro = nil
     self:updateBackingMacro()
+    self:updateIcon()
     return self
   end
   
@@ -319,7 +320,7 @@ function baseFrame.events.ZONE_CHANGED_NEW_AREA() C_Timer.After(0.5, function() 
 
 do -- icon updater, matching SecureStateDriver update schedule
   local iconUpdateFrame = CreateFrame("Frame")
-  local timer = 573 -- don't do first update until PLAYER_ENTERING_WORLD
+  local timer = 5
   
   iconUpdateFrame:SetScript("OnUpdate", function(self, dt)
     timer = timer - dt
@@ -337,7 +338,7 @@ do -- icon updater, matching SecureStateDriver update schedule
     "MODIFIER_STATE_CHANGED",
     "ACTIONBAR_PAGE_CHANGED",
     "UPDATE_BONUS_ACTIONBAR",
-    "PLAYER_ENTERING_WORLD",
+    --"PLAYER_ENTERING_WORLD", -- redundant
     "UPDATE_SHAPESHIFT_FORM",
     "UPDATE_STEALTH",
     "PLAYER_TARGET_CHANGED",
