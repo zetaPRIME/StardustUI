@@ -73,6 +73,7 @@ m = Spectral.createMacro("Mount", function()
       } (function() -- only build for our given spec since we're rebuilding on spec switch anyway
         if pd.specId == 1 and Spectral.spellKnown "Moonkin Form" then
           return { c = "[spec:1,noform:4]",
+            "/cancelform",
             "/cast !Moonkin Form",
           }
         elseif pd.specId == 4 then
