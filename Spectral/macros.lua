@@ -32,6 +32,11 @@ local function findMounts()
   normalMount = find(mountsList)
   mawMount = find(mawMountsList)
   aquaticMount = find(aquaticMountsList)
+  if not (IsSpellKnown(33388) or IsSpellKnown(33391) or IsSpellKnown(34090) or IsSpellKnown(34091) or IsSpellKnown(90265)) then
+    normalMount = find{"Summon Chauffeur"}
+    mawMount = nil
+    aquaticMount = nil
+  end
 end
 
 local druidCombatForm = {
