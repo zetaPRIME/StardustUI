@@ -25,6 +25,17 @@ function ui.createFrame(...)
   return f
 end
 
+function ui.spellKnown(...)
+  local name, rank, icon, castTime, minR, maxR, spellId = GetSpellInfo(...)
+  if not spellId then return nil end
+  return IsSpellKnown(spellId)
+end
+
+function ui.isSpell(...)
+  local name, rank, icon, castTime, minR, maxR, spellId = GetSpellInfo(...)
+  return not not spellId
+end
+
 local zoomAcc
 local minScale, maxScale = 0.5, 1.5
 local minScaleZoom, maxScaleZoom = 17.5, 3
@@ -247,15 +258,7 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     end
     if self.powerType2 then
       local v, max, p = ui.getPowerValues(self.powerType2)
-      --[[if self.powerType2.type == "RUNES" then -- track DK runes simply for now
-        v = 0
-        for i = 1, math.floor(max) do
-          if GetRuneCount(i) ~= 0 then v = v + 1 end
-        end
-      elseif self.powerType2.type == "SOUL_SHARDS" then -- take destro fragments into account
-        v = UnitPower("player", self.powerType2.id, true) / 10
-      end]]
-      self.powerBar2:SetValue(p)-- or (v / max))
+      self.powerBar2:SetValue(p)
     end
   end
   
@@ -299,6 +302,7 @@ local PowerTypeOverride = {
   DRUID3 = {1, false}, -- guardian druid
   DRUID4 = {0, false}, -- resto druid
   SHAMAN2 = {0, function(u)  -- enh shaman; maelstrom weapon stacks
+    if not IsSpellKnown(187880) then return end -- don't have Maelstrom Weapon unlocked yet
     local m = powerTypeStats(u, 11) -- maelstrom
     function m.valueFunc(pt)
       local name, icon, count = GetPlayerAuraBySpellID(187880)
@@ -393,6 +397,7 @@ end
 
 function ui.playerHud.events:PLAYER_SPECIALIZATION_CHANGED() C_Timer.After(0.1, function() self:setupForSpec() end) end
 ui.playerHud.events.PLAYER_TALENT_UPDATE = ui.playerHud.events.PLAYER_SPECIALIZATION_CHANGED
+ui.playerHud.events.PLAYER_LEVEL_CHANGED = ui.playerHud.events.PLAYER_SPECIALIZATION_CHANGED
 local loaded
 function ui.playerHud.events:ADDON_LOADED()
   if not loaded then loaded = true C_Timer.After(0.1, function() self:setupForSpec() end) end
