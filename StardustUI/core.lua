@@ -243,23 +243,25 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     
     self.healthBar:SetValue(healthProportion)
     if self.powerType then
-      self.powerBar:SetValue(UnitPower("player", self.powerType.id) / UnitPowerMax("player", self.powerType.id))
+      self.powerBar:SetValue(ui.getPowerValues(self.powerType, true))
     end
     if self.powerType2 then
-      local v, max = UnitPower("player", self.powerType2.id), UnitPowerMax("player", self.powerType2.id)
-      if self.powerType2.type == "RUNES" then -- track DK runes simply for now
+      local v, max, p = ui.getPowerValues(self.powerType2)
+      --[[if self.powerType2.type == "RUNES" then -- track DK runes simply for now
         v = 0
         for i = 1, math.floor(max) do
           if GetRuneCount(i) ~= 0 then v = v + 1 end
         end
       elseif self.powerType2.type == "SOUL_SHARDS" then -- take destro fragments into account
         v = UnitPower("player", self.powerType2.id, true) / 10
-      end
-      self.powerBar2:SetValue(v / max)
+      end]]
+      self.powerBar2:SetValue(p)-- or (v / max))
     end
   end
   
 end)
+
+local powerTypeStats -- forward declare
 
 local PowerTypes = { -- name, is combo point
   [0] = {"MANA", primary = true},
@@ -267,9 +269,19 @@ local PowerTypes = { -- name, is combo point
   [2] = {"FOCUS", primary = true},
   [3] = {"ENERGY", primary = true},
   [4] = {"COMBO_POINTS", true},
-  [5] = {"RUNES", true},
+  [5] = {"RUNES", true, func = function(pt)
+    local m = UnitPowerMax("player", pt.id)
+    v = 0
+    for i = 1, math.floor(m) do
+      if GetRuneCount(i) ~= 0 then v = v + 1 end
+    end
+    return v, m
+  end},
   [6] = {"RUNIC_POWER", primary = true},
-  [7] = {"SOUL_SHARDS", true},
+  [7] = {"SOUL_SHARDS", true, func = function(pt)
+    local v = UnitPower("player", pt.id, true) / 10
+    local m = UnitPowerMax("player", pt.id)
+  end},
   [8] = {"LUNAR_POWER"}, -- astral power
   [9] = {"HOLY_POWER", true},
   [11] = {"MAELSTROM"},
@@ -286,20 +298,42 @@ local PowerTypeOverride = {
   DRUID2 = {3, 4}, -- feral druid
   DRUID3 = {1, false}, -- guardian druid
   DRUID4 = {0, false}, -- resto druid
+  SHAMAN2 = {0, function(u)  -- enh shaman; maelstrom weapon stacks
+    local m = powerTypeStats(u, 11) -- maelstrom
+    function m.valueFunc(pt)
+      local name, icon, count = GetPlayerAuraBySpellID(187880)
+      return count or 0, 10
+    end
+    return m
+  end},
 }
 
-local function powerTypeStats(u, id)
+powerTypeStats = function(u, id)
   if id == false then return nil end
+  if type(id) == "function" then return id(u) end
   if UnitPowerMax(u or "player", id) <= 0 then return nil end
   local pt = PowerTypes[id]
   if not pt then return nil end
   local pc = PowerBarColor[pt[1]] or {r = 0, g = 255, b = 255}
-  return { id = id, type = pt[1], isCombo = pt[2], color = {pc.r, pc.g, pc.b}, isPrimary = pt.primary }
+  return { id = id, type = pt[1], isCombo = pt[2], color = {pc.r, pc.g, pc.b}, isPrimary = pt.primary, valueFunc = pt.func }
 end
 
 local function powerStats(u, i)
   local n = UnitPowerType(u or "player", i)
   return powerTypeStats(u, n)
+end
+
+function ui.getPowerValues(pt, f)
+  local v, m, p
+  if
+    pt.valueFunc then v, m, p = pt.valueFunc(pt)
+  else
+    v = UnitPower("player", pt.id)
+    m = UnitPowerMax("player", pt.id)
+  end
+  p = p or (v/m)
+  if f then return p end
+  return v, m, p
 end
 
 function ui.playerHud:setupForSpec()
