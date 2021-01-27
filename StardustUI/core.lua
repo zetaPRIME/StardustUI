@@ -305,8 +305,8 @@ local PowerTypeOverride = {
     if not IsSpellKnown(187880) then return end -- don't have Maelstrom Weapon unlocked yet
     local m = powerTypeStats(u, 11) -- maelstrom
     function m.valueFunc(pt)
-      local name, icon, count = GetPlayerAuraBySpellID(187880)
-      return count or 0, 10
+      local name, icon, count = GetPlayerAuraBySpellID(344179)
+      return (count or 0), 10
     end
     return m
   end},
