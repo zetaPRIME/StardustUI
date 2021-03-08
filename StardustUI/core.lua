@@ -284,6 +284,7 @@ local PowerTypes = { -- name, is combo point
   [7] = {"SOUL_SHARDS", true, func = function(pt)
     local v = UnitPower("player", pt.id, true) / 10
     local m = UnitPowerMax("player", pt.id)
+    return v, m
   end},
   [8] = {"LUNAR_POWER"}, -- astral power
   [9] = {"HOLY_POWER", true},

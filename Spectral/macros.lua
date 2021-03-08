@@ -144,3 +144,24 @@ m = Spectral.createMacro("Stealth", function()
     return Spectral.inactiveBinding()
   end
 end)
+
+m = Spectral.createMacro("Interrupt", function()
+  return {
+    "/stopcasting",
+    Spectral.castKnown {
+      c = "[@mouseover,harm][@focus,harm][]",
+      -- direct interrupts
+      "Solar Beam", "Skull Bash",
+      "Counterspell",
+      "Rebuke",
+      "Kick",
+      "Wind Shear",
+      "Pummel",
+      "Spell Lock", "Optical Blast",
+      "Mind Freeze",
+      "Spear Hand Strike",
+      "Counter Shot",
+      "Disrupt",
+    },
+  }
+end)

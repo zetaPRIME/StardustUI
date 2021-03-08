@@ -88,3 +88,21 @@ do
     return zoneMap[z] or z
   end
 end
+
+function Spectral.castKnown(lst)
+  local condition = lst.condition or lst.c or ""
+  local fallback = lst.fallback or lst.fb
+  
+  for i = 1,99999 do
+    local cd = lst[i]
+    if not cd then break end
+    if Spectral.spellKnown(cd) then -- found!
+      return table.concat { "/cast ", condition, cd }
+    end
+  end
+  
+  if fallback then
+    if string.sub(fallback, 1, 1) ~= "/" then return "/cast " .. fallback end
+    return fallback
+  end
+end
