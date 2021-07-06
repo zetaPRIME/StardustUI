@@ -106,7 +106,9 @@ m = Spectral.createMacro("Mount", function()
         "#icon ",
       }
     end
-    local mount = (z ~= "The Maw") and normalMount or mawMount or ""
+    -- match zone, but no restriction if True Maw Walker is unlocked
+    local mawRestriction = (z == "The Maw" or z == "Korthia") and not (normalMount and IsUsableSpell(normalMount))
+    local mount = (not mawRestriction) and normalMount or mawMount or ""
     if z == "Vashj'ir" and Spectral.isSpell "Vashj'ir Seahorse" then
       mount = "[swimming,nomod:alt]Vashj'ir Seahorse;" .. mount -- this is faster than other aquatic mounts apparently?
     elseif aquaticMount then
