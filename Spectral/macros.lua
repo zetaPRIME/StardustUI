@@ -43,6 +43,8 @@ local druidCombatForm = {
   4, 2, 1, 0
 }
 
+local mawMountable
+
 m = Spectral.createMacro("Mount", function()
   local pd = Spectral.getPlayerData()
   
@@ -107,7 +109,11 @@ m = Spectral.createMacro("Mount", function()
       }
     end
     -- match zone, but no restriction if True Maw Walker is unlocked
-    local mawRestriction = (z == "The Maw" or z == "Korthia") and not (normalMount and IsUsableSpell(normalMount))
+    local inMaw = z == "The Maw" or z == "Korthia"
+    if inMaw then
+      mawMountable = mawMountable or (normalMount and IsUsableSpell(normalMount))
+    end
+    local mawRestriction = inMaw and not mawMountable
     local mount = (not mawRestriction) and normalMount or mawMount or ""
     if z == "Vashj'ir" and Spectral.isSpell "Vashj'ir Seahorse" then
       mount = "[swimming,nomod:alt]Vashj'ir Seahorse;" .. mount -- this is faster than other aquatic mounts apparently?
