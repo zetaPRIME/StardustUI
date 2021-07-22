@@ -68,6 +68,7 @@ m = Spectral.createMacro("Mount", function()
     
     return {
       "@name Form",
+      "/cancelaura Path of Greed",
       "/dismount", "/leavevehicle [canexitvehicle]",
       branch (function()
         if pd.specId == 4 then -- resto, moonkin when holding alt
@@ -124,6 +125,7 @@ m = Spectral.createMacro("Mount", function()
     return {
       "#show " .. mount,
       branch { c = "[nomounted,nocanexitvehicle]",
+        "/cancelaura Path of Greed",
         "/cast " .. mount,
         (function() if Spectral.spellKnown "Ghost Wolf" then return "/cast Ghost Wolf" end end)(),
       } {
