@@ -64,27 +64,31 @@ m = Spectral.createMacro("Mount", function()
       end
     end
     
-    local cc = "][outdoors,harm,form:" .. druidCombatForm[pd.specId] .. "]" -- combat condition
+    local form = druidCombatForm[pd.specId] or 0
+    if form == 4 and not Spectral.spellKnown "Moonkin Form" then form = 0 end
+    local cc = "][outdoors,harm,form:" .. form .. "]" -- combat condition
     
     return {
       "@name Form",
       "/cancelaura Path of Greed",
       "/dismount", "/leavevehicle [canexitvehicle]",
       branch (function()
-        if pd.specId == 4 then -- resto, moonkin when holding alt
-          return { c = "[spec:4,noform:1,mod:alt]",
+        if pd.specId == 4 and Spectral.spellKnown "Moonkin Form" then -- resto, moonkin when holding alt+shift
+          return { c = "[spec:4,noform:1,mod:alt,mod:shift]",
             "/cast !Moonkin Form",
           }
         end
       end) { c = "[outdoors,noform:3,noharm" .. mc .. cc,
         tfc,
       } (function() -- only build for our given spec since we're rebuilding on spec switch anyway
-        if pd.specId == 1 and Spectral.spellKnown "Moonkin Form" then
-          return { c = "[spec:1,noform:4]",
+        if pd.specId == 1 then
+          local mk = Spectral.spellKnown "Moonkin Form"
+          return { c = "[spec:1,noform:" .. (mk and "4" or "0") .. "]",
+            (not mk) and "#show Travel Form",
             "/cancelform",
             "/cast !Moonkin Form",
           }
-        elseif pd.specId == 4 then
+        elseif pd.specId == 4 or pd.specId == 0 then
           return { c = "[spec:4,noform:0]",
             "/cancelform",
             "#show [form:3]Travel Form;Mount Form",

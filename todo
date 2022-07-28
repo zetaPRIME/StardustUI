@@ -16,4 +16,6 @@ StardustUI {
 Spectral {
   x mount macro - use soulshape if available, not channeling and not mounting etc.
   ^ not mount scope like ghost wolf; is on a timer
+  
+  - FIX BALANCE NOT FALLING BACK TO CAT FORM (looks like was only pre-moonkin)
 }
