@@ -254,14 +254,16 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     local bscale = Lerp(1.0, 2.0, clamp(ui.playerSurround.scaleProp or 0))
     self.buffArea:SetScale(bscale)
     
-    self.healthBar:SetValue(healthProportion)
-    if self.powerType then
-      self.powerBar:SetValue(ui.getPowerValues(self.powerType, true))
-    end
-    if self.powerType2 then
-      local v, max, p = ui.getPowerValues(self.powerType2)
-      self.powerBar2:SetValue(p)
-    end
+    pcall(function() -- wrap this because otherwise it spams errors on zone load no matter how I try to validate
+      self.healthBar:SetValue(healthProportion)
+      if self.powerType then
+        self.powerBar:SetValue(ui.getPowerValues(self.powerType, true))
+      end
+      if self.powerType2 then
+        local v, max, p = ui.getPowerValues(self.powerType2)
+        self.powerBar2:SetValue(p)
+      end
+    end)
   end
   
 end)
