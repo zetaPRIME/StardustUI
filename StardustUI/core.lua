@@ -90,6 +90,17 @@ ui.playerSurround:SetScript("onUpdate", function(self, dt)
   self:Show()
   
   prd:SetAlpha(0) -- don't need to show this
+  
+  -- parent cast bar by brute force since UIPARENT_MANAGED_FRAME_POSITIONS doesn't exist anymore
+  pcall(function()
+    PlayerCastingBarFrame:SetParent(ui.playerSurround)
+    PlayerCastingBarFrame:ClearAllPoints()
+    PlayerCastingBarFrame:SetPoint("CENTER", ui.playerSurround, "CENTER", 0, -110)
+    PlayerCastingBarFrame:SetScale(1.5)
+    --PlayerCastingBarFrame:SetFrameStrata("LOW")
+    --PlayerCastingBarFrame:Lower()
+    --UIPARENT_MANAGED_FRAME_POSITIONS.CastingBarFrame = nil -- disable UIParent trying to set points
+  end)
 end)
 
 --[[
@@ -160,15 +171,6 @@ SpellActivationOverlayFrame:SetPoint("CENTER", ui.playerHud, "CENTER", 0, 0)
 SpellActivationOverlayFrame:SetScale(1.5)
 SpellActivationOverlayFrame:SetFrameStrata("LOW")
 SpellActivationOverlayFrame:Lower()
-
--- parent cast bar
-UIPARENT_MANAGED_FRAME_POSITIONS.CastingBarFrame = nil -- disable UIParent trying to set points
-CastingBarFrame:SetParent(ui.playerSurround)
-CastingBarFrame:ClearAllPoints()
-CastingBarFrame:SetPoint("CENTER", ui.playerSurround, "CENTER", 0, -110)
-CastingBarFrame:SetScale(1.5)
---CastingBarFrame:SetFrameStrata("LOW")
---CastingBarFrame:Lower()
 
 do
   local buffArea = ui.createFrame("Frame", "StardustUI:PlayerBuffs", ui.playerHud)
