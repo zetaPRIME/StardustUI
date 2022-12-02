@@ -25,6 +25,12 @@ local processingMacro
 local lastFragment = 0
 local fragmentPool = { }
 
+local clickParams
+local function updateClickParams()
+  local down = GetCVar("ActionButtonUseKeyDown")
+  clickParams = " LeftButton " .. (down and "1" or "0")
+end
+
 -- grab a fragment from the pool if it contains any, or initialize one if not
 local function getFragment()
   local f
@@ -37,6 +43,7 @@ local function getFragment()
     f.fragmentId = name
     f:Hide()
     f:SetAttribute("type", "macro")
+    f:RegisterForClicks("AnyUp", "AnyDown")
     f.ttg = { }
     
     fragments[name] = f
@@ -58,7 +65,7 @@ function tok(s)
   return string.match(s,"(%S+)%s+(.+)")
 end
 
-local charLimit = 1022 - string.len("/click SPXf12345678")
+local charLimit = 1022 - string.len("/click SPXf12345678 LeftButton 1")
 local function processFragment(inp)
   
   local f = getFragment() -- initial fragment
@@ -91,6 +98,7 @@ local function processFragment(inp)
         local xf = getFragment() -- extend fragment
         table.insert(acc, "/click ")
         table.insert(acc, xf.fragmentId)
+        table.insert(acc, clickParams)
         
         cf:SetAttribute("macrotext", table.concat(acc))
         acc = { } cc = 0 cf = xf
@@ -127,6 +135,7 @@ do -- branch ops
     table.insert(bt, condition)
     local f = processFragment(t)
     table.insert(bt, f.fragmentId)
+    table.insert(bt, clickParams)
     
     return bt
   end
@@ -142,6 +151,7 @@ do -- branch ops
     table.insert(self, condition)
     local f = processFragment(t)
     table.insert(self, f.fragmentId)
+    table.insert(self, clickParams)
     
     return self
   end
@@ -182,6 +192,7 @@ do -- macro ops
   end
   
   function mp:rebuild()
+    updateClickParams()
     self:reinit() -- reset fragments
     processingMacro = self
     self.initialFragment = processFragment(self:buildFunc() or { })
@@ -215,7 +226,7 @@ do -- macro ops
     self:findBackingMacro()
     if self.backingMacro then
       EditMacro(self.backingMacro, self.displayName or self.name, self.icon or "INV_Misc_QuestionMark", table.concat {
-        "#SPX ", self.name, "\n#showtooltip\n/click ", self.initialFragment.fragmentId
+        "#SPX ", self.name, "\n#showtooltip\n/click ", self.initialFragment.fragmentId, clickParams
       })
     end
   end
