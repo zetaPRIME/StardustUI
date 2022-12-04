@@ -4,7 +4,7 @@ local branch = Spectral.branch
 
 local m
 
-local normalMount, mawMount, aquaticMount
+local normalMount, mawMount, aquaticMount, dragonMount
 local mountsList = {
   "Vulpine Familiar",
 }
@@ -22,6 +22,9 @@ local aquaticMountsList = {
   "Brinedeep Bottom-Feeder", -- the ugly fish
   
 }
+local dragonMountsList = {
+  "Renewed Proto-Drake", -- we'll start with just the first one you get
+}
 local function findMounts()
   local function find(l)
     for _, m in pairs(l) do
@@ -32,6 +35,7 @@ local function findMounts()
   normalMount = find(mountsList)
   mawMount = find(mawMountsList)
   aquaticMount = find(aquaticMountsList)
+  dragonMount = find(dragonMountsList)
   if not (IsSpellKnown(33388) or IsSpellKnown(33391) or IsSpellKnown(34090) or IsSpellKnown(34091) or IsSpellKnown(90265)) then
     normalMount = find{"Summon Chauffeur"}
     mawMount = nil
@@ -120,6 +124,7 @@ m = Spectral.createMacro("Mount", function()
     end
     local mawRestriction = inMaw and not mawMountable
     local mount = (not mawRestriction) and normalMount or mawMount or ""
+    if Spectral.zoneIsDragonRiding() then mount = dragonMount or mount end
     if z == "Vashj'ir" and Spectral.isSpell "Vashj'ir Seahorse" then
       mount = "[swimming,nomod:alt]Vashj'ir Seahorse;" .. mount -- this is faster than other aquatic mounts apparently?
     elseif aquaticMount then
@@ -178,4 +183,8 @@ m = Spectral.createMacro("Interrupt", function()
       "Disrupt",
     },
   }
+end)
+
+m = Spectral.createMacro("Debug Zone Info", function()
+  return { "/script Spectral.debugZoneInfo()" }
 end)

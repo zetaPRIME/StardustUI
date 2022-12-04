@@ -74,6 +74,26 @@ do
     if type(ff) == "boolean" then return ff end
     return IsSpellKnown(ff)
   end
+  
+  local dragonRidingMap = {
+    -- names
+    ["10.0 Dragon Isles"] = true,
+    
+    -- IDs
+    [2444] = true, -- main Dragon Isles
+  }
+  
+  function Spectral.zoneIsDragonRiding()
+    local name, _, _, _, _, _, _, instanceID = GetInstanceInfo()
+    return dragonRidingMap[instanceID] or dragonRidingMap[name]
+  end
+  
+  function Spectral.debugZoneInfo()
+    local name, _, _, _, _, _, _, instanceID = GetInstanceInfo()
+    print("Current zone: \"" .. name .. "\" (" .. instanceID .. ")")
+    if Spectral.zoneIsFlyable() then print "Zone is flyable" end
+    if Spectral.zoneIsDragonRiding() then print "Zone allows dragon riding" end
+  end
 end
 
 do
