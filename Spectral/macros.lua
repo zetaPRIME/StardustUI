@@ -23,6 +23,7 @@ local aquaticMountsList = {
   
 }
 local dragonMountsList = {
+  "Windborne Velocidrake",
   "Renewed Proto-Drake", -- we'll start with just the first one you get
 }
 local function findMounts()

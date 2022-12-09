@@ -81,6 +81,7 @@ do
     
     -- IDs
     [2444] = true, -- main Dragon Isles
+    [2512] = true, -- "Grand Time Adventure" / Primalist Future (quest version?)
   }
   
   function Spectral.zoneIsDragonRiding()
