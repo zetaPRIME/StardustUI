@@ -238,6 +238,7 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
   if UnitExists("target")
     and UnitCanAttack("player", "target")
     and not UnitIsDead("target")
+    and (UnitIsEnemy("target", "player") or not IsTargetLoose()) -- don't pop up on soft targeting a passive
     then targetAlpha = 0.5 end
   if UnitAffectingCombat("player") then targetAlpha = 1 end
   
@@ -298,6 +299,7 @@ local PowerTypes = { -- name, is combo point
   [16] = {"ARCANE_CHARGES", true},
   [17] = {"FURY", primary = true},
   [18] = {"PAIN", primary = true}, -- no longer exists but whatever
+  [19] = {"ESSENCE", primary = true},
   --
 }
 
@@ -315,6 +317,8 @@ local PowerTypeOverride = {
     end
     return m
   end},
+  EVOKER1 = {19, 0},
+  EVOKER2 = {19, 0},
 }
 
 powerTypeStats = function(u, id)
