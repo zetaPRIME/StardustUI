@@ -40,6 +40,14 @@ function Spectral.inactiveBinding(name)
 end
 
 do
+  local function mapInfo()
+    local name, _, _, _, _, _, _, instanceID = GetInstanceInfo()
+    return {
+      name = name,
+      id = instanceID,
+    }
+  end
+  
   local pf = { -- pathfinder spell list
     bfa = 278833,
   }
@@ -69,18 +77,6 @@ do
     [1479] = false, -- Skyhold (Warrior)
   }
   
-  function Spectral.zoneIsFlyable()
-    -- no zone is flyable to someone who can't fly yet
-    if not (IsSpellKnown(34090) or IsSpellKnown(34091) or IsSpellKnown(90265)) then return false end
-    
-    local _, _, _, _, _, _, _, instanceID = GetInstanceInfo()
-    local ff = zoneFlyMap[instanceID]
-    if ff == nil then return IsFlyableArea() end
-    if type(ff) == "boolean" then return ff end
-    return IsSpellKnown(ff)
-  end
-  
-  -- [[
   local dragonRidingMap = {
     -- names
     ["10.0 Dragon Isles"] = true,
@@ -88,10 +84,20 @@ do
     -- IDs
     [2444] = true, -- main Dragon Isles
     --[2512] = true, -- "Grand Time Adventure" / Primalist Future (quest version?)
-  } -- ]]
+  }
+  
+  function Spectral.zoneIsFlyable()
+    -- no zone is flyable to someone who can't fly yet
+    if not (IsSpellKnown(34090) or IsSpellKnown(34091) or IsSpellKnown(90265)) then return false end
+    
+    local map = mapInfo()
+    local ff = zoneFlyMap[map.id]
+    if ff == nil then return IsFlyableArea() end
+    if type(ff) == "boolean" then return ff end
+    return IsSpellKnown(ff)
+  end
   
   local drc = false;
-  
   function Spectral.zoneIsDragonRiding()
     local mountable = IsUsableSpell(150544) -- can use mount roulette
     local ridable = IsUsableSpell(368896) -- can use proto-drake
@@ -102,16 +108,16 @@ do
       return false
     end
     -- if not mountable then make an assumption depending on area
-    local name, _, _, _, _, _, _, instanceID = GetInstanceInfo()
-    if dragonRidingMap[instanceID] or dragonRidingMap[name] then
+    local map = mapInfo()
+    if dragonRidingMap[map.id] or dragonRidingMap[map.name] then
       drc = true
     end
     return drc
   end
   
   function Spectral.debugZoneInfo()
-    local name, _, _, _, _, _, _, instanceID = GetInstanceInfo()
-    print("Current zone: \"" .. name .. "\" (" .. instanceID .. ")")
+    local map = mapInfo()
+    print("Current zone: \"" .. map.name .. "\" (" .. map.id .. ")")
     if Spectral.zoneIsFlyable() then print "Zone is flyable" end
     if Spectral.zoneIsDragonRiding() then print "Zone allows dragon riding" end
   end
