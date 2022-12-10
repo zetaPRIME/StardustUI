@@ -50,7 +50,7 @@ local druidCombatForm = {
 
 local mawMountable
 
-m = Spectral.createMacro("Mount", function()
+m = Spectral.createMacro("spx:mount", "Mount", function()
   local pd = Spectral.getPlayerData()
   
   if pd.className == "DRUID" then -- shapeshift macro
@@ -149,7 +149,7 @@ end)
 m:updatesOn "zone" -- can change on entering the maw
 m:updatesOn "mountable"
 
-m = Spectral.createMacro("Stealth", function()
+m = Spectral.createMacro("spx:stealth", "Stealth", function()
   local pd = Spectral.getPlayerData()
   
   if pd.className == "DRUID" then
@@ -166,7 +166,7 @@ m = Spectral.createMacro("Stealth", function()
   end
 end)
 
-m = Spectral.createMacro("Interrupt", function()
+m = Spectral.createMacro("spx:interrupt", "Interrupt", function()
   return {
     "/stopcasting",
     Spectral.castKnown {
@@ -187,6 +187,6 @@ m = Spectral.createMacro("Interrupt", function()
   }
 end)
 
-m = Spectral.createMacro("Debug Zone Info", function()
+m = Spectral.createMacro("dbg:zoneinfo", "Debug Zone Info", function()
   return { "#show item:187899", "/script Spectral.debugZoneInfo()" }
 end)
