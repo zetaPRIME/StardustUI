@@ -163,14 +163,19 @@ do -- macro ops
   local mp = { }
   local mmt = {__index = mp}
   
-  function Spectral.createMacro(name, func)
-    if type(name) ~= "string" then return end
+  function Spectral.createMacro(id, displayName, func)
+    if type(id) ~= "string" then return end
+    if type(displayName) == "function" then -- two-parameter invocation
+      func = displayName
+      displayName = id
+    end
     local m = setmetatable({ }, mmt)
-    m.name = name
+    m.name = id
+    m.defaultDisplayName = displayName
     m.buildFunc = func
     m.updateReasons = { default = true }
     m:reinit()
-    macros[name] = m
+    macros[id] = m
     
     return m
   end
@@ -187,7 +192,7 @@ do -- macro ops
     end
     self.fragments = { }
     self.initialFragment = nil
-    self.displayName = nil
+    self.displayName = self.defaultDisplayName
     self.icon = nil
   end
   
