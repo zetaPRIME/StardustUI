@@ -329,6 +329,18 @@ end
 -- other reasons
 function baseFrame.events.ZONE_CHANGED_NEW_AREA() C_Timer.After(0.5, function() Spectral.queueUpdate "zone" end) end
 
+do -- mountability change
+  local chk = 150544 -- we use mount roulette to check mountability
+  local mountable = false
+  C_Timer.After(0.5, function() mountable = IsUsableSpell(chk) end)
+  
+  function baseFrame.events.SPELL_UPDATE_USABLE(tb)
+    local m = IsUsableSpell(chk)
+    if m ~= mountable then Spectral.queueUpdate "mountable" end
+    mountable = m
+  end
+end
+
 do -- icon updater, matching SecureStateDriver update schedule
   local iconUpdateFrame = CreateFrame("Frame")
   local timer = 5
