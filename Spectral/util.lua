@@ -80,20 +80,33 @@ do
     return IsSpellKnown(ff)
   end
   
-  --[[
+  -- [[
   local dragonRidingMap = {
     -- names
     ["10.0 Dragon Isles"] = true,
     
     -- IDs
     [2444] = true, -- main Dragon Isles
-    [2512] = true, -- "Grand Time Adventure" / Primalist Future (quest version?)
+    --[2512] = true, -- "Grand Time Adventure" / Primalist Future (quest version?)
   } -- ]]
   
+  local drc = false;
+  
   function Spectral.zoneIsDragonRiding()
-    return IsUsableSpell(368896) -- we can just check if the player is able to use the Renewed Proto-Drake
-    --local name, _, _, _, _, _, _, instanceID = GetInstanceInfo()
-    --return dragonRidingMap[instanceID] or dragonRidingMap[name]
+    local mountable = IsUsableSpell(150544) -- can use mount roulette
+    local ridable = IsUsableSpell(368896) -- can use proto-drake
+    if ridable then -- we can just check if the player is able to use the Renewed Proto-Drake
+      drc = true
+    elseif mountable then -- non-dragon mounts enabled; definitely not
+      drc = false
+      return false
+    end
+    -- if not mountable then make an assumption depending on area
+    local name, _, _, _, _, _, _, instanceID = GetInstanceInfo()
+    if dragonRidingMap[instanceID] or dragonRidingMap[name] then
+      drc = true
+    end
+    return drc
   end
   
   function Spectral.debugZoneInfo()
