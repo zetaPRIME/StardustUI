@@ -187,5 +187,5 @@ m = Spectral.createMacro("Interrupt", function()
 end)
 
 m = Spectral.createMacro("Debug Zone Info", function()
-  return { "/script Spectral.debugZoneInfo()" }
+  return { "#show item:187899", "/script Spectral.debugZoneInfo()" }
 end)

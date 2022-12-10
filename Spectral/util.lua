@@ -13,6 +13,11 @@ function Spectral.isSpell(...)
   return not not spellId
 end
 
+function Spectral.canUse(...)
+  local name, rank, icon, castTime, minR, maxR, spellId = GetSpellInfo(...)
+  return IsUsableSpell(spellId)
+end
+
 function Spectral.getPlayerData()
   local pd = { }
   local _
@@ -75,6 +80,7 @@ do
     return IsSpellKnown(ff)
   end
   
+  --[[
   local dragonRidingMap = {
     -- names
     ["10.0 Dragon Isles"] = true,
@@ -82,11 +88,12 @@ do
     -- IDs
     [2444] = true, -- main Dragon Isles
     [2512] = true, -- "Grand Time Adventure" / Primalist Future (quest version?)
-  }
+  } -- ]]
   
   function Spectral.zoneIsDragonRiding()
-    local name, _, _, _, _, _, _, instanceID = GetInstanceInfo()
-    return dragonRidingMap[instanceID] or dragonRidingMap[name]
+    return IsUsableSpell(368896) -- we can just check if the player is able to use the Renewed Proto-Drake
+    --local name, _, _, _, _, _, _, instanceID = GetInstanceInfo()
+    --return dragonRidingMap[instanceID] or dragonRidingMap[name]
   end
   
   function Spectral.debugZoneInfo()
