@@ -212,6 +212,12 @@ do
   healthBar.fill:SetPoint("LEFT", healthBar, "LEFT")
   healthBar.fill:SetPoint("RIGHT", healthBar, "RIGHT")
   
+  healthBar.heal = healthBar:CreateTexture(nil, "ARTWORK")
+  healthBar.heal:SetTexture(ui.texture "healthBarFill")
+  healthBar.heal:SetVertexColor(0.25, 0.75, 0.70)
+  healthBar.heal:SetPoint("LEFT", healthBar, "LEFT")
+  healthBar.heal:SetPoint("RIGHT", healthBar, "RIGHT")
+  
   healthBar.bg = healthBar:CreateTexture(nil, "BACKGROUND")
   healthBar.bg:SetTexture(ui.texture "healthBarBackground")
   healthBar.bg:SetAllPoints(true)
@@ -254,7 +260,10 @@ end
 ui.playerHud:SetScript("onUpdate", function(self, dt)
   setupCVars() -- fuck it, sledgehammer
   
-  local healthProportion = UnitHealth("player") / UnitHealthMax("player")
+  local health = UnitHealth("player")
+  local healthMax = UnitHealthMax("player")
+  local healthProportion = health / healthMax
+  local heal = min((health + UnitGetIncomingHeals("player")) / healthMax, 1.0)
   
   local targetAlpha = 0
   if healthProportion < 0.75 then targetAlpha = 0.3 end
@@ -280,8 +289,8 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     self.buffArea:SetScale(bscale)
     
     pcall(function() -- wrap this because otherwise it spams errors on zone load no matter how I try to validate
-      --self.healthBar:SetValue(healthProportion)
       setBarRange(self.healthBar.fill, 0, healthProportion)
+      setBarRange(self.healthBar.heal, healthProportion, heal)
       if self.powerType then
         self.powerBar:SetValue(ui.getPowerValues(self.powerType, true))
       end
