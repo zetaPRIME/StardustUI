@@ -223,7 +223,7 @@ do
   powerBar:SetSize(64, 256)
   powerBar:SetPoint("CENTER", ui.playerHud, "RIGHT", 0, 0)
   
-  powerBar.fill = healthBar:CreateTexture(nil, "ARTWORK")
+  powerBar.fill = powerBar:CreateTexture(nil, "ARTWORK")
   powerBar.fill:SetTexture(ui.texture "powerBarFill")
   powerBar.fill:SetPoint("LEFT", powerBar, "LEFT")
   powerBar.fill:SetPoint("RIGHT", powerBar, "RIGHT")
@@ -239,7 +239,7 @@ do
   powerBar2:SetSize(64, 256)
   powerBar2:SetPoint("CENTER", ui.playerHud, "RIGHT", 24, 0)
   
-  powerBar2.fill = healthBar:CreateTexture(nil, "ARTWORK")
+  powerBar2.fill = powerBar2:CreateTexture(nil, "ARTWORK")
   powerBar2.fill:SetTexture(ui.texture "powerBarFill")
   powerBar2.fill:SetPoint("LEFT", powerBar2, "LEFT")
   powerBar2.fill:SetPoint("RIGHT", powerBar2, "RIGHT")
@@ -257,7 +257,6 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
   local health = UnitHealth("player")
   local healthMax = UnitHealthMax("player")
   local healthProportion = health / healthMax
-  local heal = min((health + UnitGetIncomingHeals("player")) / healthMax, 1.0)
   
   local targetAlpha = 0
   if healthProportion < 0.75 then targetAlpha = 0.3 end
@@ -282,6 +281,7 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     self.buffArea:SetScale(bscale)
     
     pcall(function() -- wrap this because otherwise it spams errors on zone load no matter how I try to validate
+      local heal = min((health + UnitGetIncomingHeals("player")) / healthMax, 1.0)
       setBarRange(self.healthBar.fill, 0, healthProportion)
       setBarRange(self.healthBar.heal, healthProportion, heal)
       if self.powerType then
