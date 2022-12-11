@@ -199,12 +199,6 @@ do
   ui.playerHud.healthBar = healthBar
   healthBar:SetSize(64, 256)
   healthBar:SetPoint("CENTER", ui.playerHud, "LEFT", 0, 0)
-  --healthBar:SetStatusBarTexture(ui.texture "healthBarFill")
-  --healthBar:SetStatusBarColor(1, 0, 0)
-  --healthBar:SetOrientation("VERTICAL")
-  
-  --healthBar:SetMinMaxValues(-0.14, 1.14)
-  --healthBar:SetValue(1)
   
   healthBar.fill = healthBar:CreateTexture(nil, "ARTWORK")
   healthBar.fill:SetTexture(ui.texture "healthBarFill")
@@ -224,15 +218,15 @@ do
   
   healthBar:Show()
   
-  local powerBar = ui.createFrame("StatusBar", nil, ui.playerHud)
+  local powerBar = ui.createFrame("Frame", nil, ui.playerHud)
   ui.playerHud.powerBar = powerBar
   powerBar:SetSize(64, 256)
   powerBar:SetPoint("CENTER", ui.playerHud, "RIGHT", 0, 0)
-  powerBar:SetStatusBarTexture(ui.texture "powerBarFill")
-  powerBar:SetOrientation("VERTICAL")
   
-  powerBar:SetMinMaxValues(-0.14, 1.14)
-  powerBar:SetValue(1)
+  powerBar.fill = healthBar:CreateTexture(nil, "ARTWORK")
+  powerBar.fill:SetTexture(ui.texture "powerBarFill")
+  powerBar.fill:SetPoint("LEFT", powerBar, "LEFT")
+  powerBar.fill:SetPoint("RIGHT", powerBar, "RIGHT")
   
   powerBar.bg = powerBar:CreateTexture(nil, "BACKGROUND")
   powerBar.bg:SetTexture(ui.texture "powerBarBackground")
@@ -240,15 +234,15 @@ do
   
   powerBar:Show()
   
-  local powerBar2 = ui.createFrame("StatusBar", nil, ui.playerHud)
+  local powerBar2 = ui.createFrame("Frame", nil, ui.playerHud)
   ui.playerHud.powerBar2 = powerBar2
   powerBar2:SetSize(64, 256)
   powerBar2:SetPoint("CENTER", ui.playerHud, "RIGHT", 24, 0)
-  powerBar2:SetStatusBarTexture(ui.texture "powerBarFill")
-  powerBar2:SetOrientation("VERTICAL")
   
-  powerBar2:SetMinMaxValues(-0.14, 1.14)
-  powerBar2:SetValue(1)
+  powerBar2.fill = healthBar:CreateTexture(nil, "ARTWORK")
+  powerBar2.fill:SetTexture(ui.texture "powerBarFill")
+  powerBar2.fill:SetPoint("LEFT", powerBar2, "LEFT")
+  powerBar2.fill:SetPoint("RIGHT", powerBar2, "RIGHT")
   
   powerBar2.bg = powerBar2:CreateTexture(nil, "BACKGROUND")
   powerBar2.bg:SetTexture(ui.texture "powerBarBackground")
@@ -273,7 +267,6 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     and (UnitIsEnemy("target", "player") or not IsTargetLoose()) -- don't pop up on soft targeting a passive
     then targetAlpha = 0.5 end
   if UnitAffectingCombat("player") then targetAlpha = 1 end
-  targetAlpha = 1 -- DEBUG
   
   self.alpha = self.alpha or targetAlpha
   local diff = targetAlpha - self.alpha
@@ -292,11 +285,12 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
       setBarRange(self.healthBar.fill, 0, healthProportion)
       setBarRange(self.healthBar.heal, healthProportion, heal)
       if self.powerType then
-        self.powerBar:SetValue(ui.getPowerValues(self.powerType, true))
+        local v, max, p = ui.getPowerValues(self.powerType)
+        setBarRange(self.powerBar.fill, 0, p)
       end
       if self.powerType2 then
         local v, max, p = ui.getPowerValues(self.powerType2)
-        self.powerBar2:SetValue(p)
+        setBarRange(self.powerBar2.fill, 0, p)
       end
     end)
   end
@@ -427,12 +421,12 @@ function ui.playerHud:setupForSpec()
   
   if self.powerType then
     self.powerBar:Show()
-    self.powerBar:SetStatusBarColor(unpack(self.powerType.color))
+    self.powerBar.fill:SetVertexColor(unpack(self.powerType.color))
   end
   
   if self.powerType2 then
     self.powerBar2:Show()
-    self.powerBar2:SetStatusBarColor(unpack(self.powerType2.color))
+    self.powerBar2.fill:SetVertexColor(unpack(self.powerType2.color))
     self.powerBar2:SetPoint("CENTER", self, "RIGHT", bpos, 0)
     bpos = bpos + bpi
   end
