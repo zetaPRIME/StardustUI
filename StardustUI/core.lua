@@ -46,7 +46,24 @@ local raceHeight = {
   Gnome = 0.5, Mechagnome = 0.5,
   Goblin = 0.5,
   Vulpera = 0.5,
+  
+  Dracthyr = 1.25, -- base on main form
 }
+
+local barMargin = 56 / 512
+-- sets a texture widget to a specific slice of its parent within bar range
+local function setBarRange(tx, mn, mx)
+  local p = tx:GetParent()
+  local ph = p:GetHeight()
+  local r = 1.0 - barMargin*2 -- amount of "real" area there is between the margins
+  
+  local top = barMargin + (1.0-mx)*r
+  local bot = barMargin + mn*r
+  
+  tx:SetPoint("TOP", p, "TOP", 0, -ph * top)
+  tx:SetPoint("BOTTOM", p, "BOTTOM", 0, ph * bot)
+  tx:SetTexCoord(0, 1, top, 1-bot)
+end
 
 local prd
 ui.playerSurround = ui.createFrame("Frame", nil, UIParent)
@@ -178,16 +195,22 @@ do
   buffArea:SetSize(1, 1)
   buffArea:SetPoint("CENTER", ui.playerHud, "TOP", 0, 0)
   
-  local healthBar = ui.createFrame("StatusBar", nil, ui.playerHud)
+  local healthBar = ui.createFrame("Frame", nil, ui.playerHud)
   ui.playerHud.healthBar = healthBar
   healthBar:SetSize(64, 256)
   healthBar:SetPoint("CENTER", ui.playerHud, "LEFT", 0, 0)
-  healthBar:SetStatusBarTexture(ui.texture "healthBarFill")
-  healthBar:SetStatusBarColor(1, 0, 0)
-  healthBar:SetOrientation("VERTICAL")
+  --healthBar:SetStatusBarTexture(ui.texture "healthBarFill")
+  --healthBar:SetStatusBarColor(1, 0, 0)
+  --healthBar:SetOrientation("VERTICAL")
   
-  healthBar:SetMinMaxValues(-0.14, 1.14)
-  healthBar:SetValue(1)
+  --healthBar:SetMinMaxValues(-0.14, 1.14)
+  --healthBar:SetValue(1)
+  
+  healthBar.fill = healthBar:CreateTexture(nil, "ARTWORK")
+  healthBar.fill:SetTexture(ui.texture "healthBarFill")
+  healthBar.fill:SetVertexColor(1.0, 0.15, 0.15)
+  healthBar.fill:SetPoint("LEFT", healthBar, "LEFT")
+  healthBar.fill:SetPoint("RIGHT", healthBar, "RIGHT")
   
   healthBar.bg = healthBar:CreateTexture(nil, "BACKGROUND")
   healthBar.bg:SetTexture(ui.texture "healthBarBackground")
@@ -241,6 +264,7 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     and (UnitIsEnemy("target", "player") or not IsTargetLoose()) -- don't pop up on soft targeting a passive
     then targetAlpha = 0.5 end
   if UnitAffectingCombat("player") then targetAlpha = 1 end
+  targetAlpha = 1 -- DEBUG
   
   self.alpha = self.alpha or targetAlpha
   local diff = targetAlpha - self.alpha
@@ -256,7 +280,8 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     self.buffArea:SetScale(bscale)
     
     pcall(function() -- wrap this because otherwise it spams errors on zone load no matter how I try to validate
-      self.healthBar:SetValue(healthProportion)
+      --self.healthBar:SetValue(healthProportion)
+      setBarRange(self.healthBar.fill, 0, healthProportion)
       if self.powerType then
         self.powerBar:SetValue(ui.getPowerValues(self.powerType, true))
       end
