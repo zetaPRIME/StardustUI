@@ -29,16 +29,20 @@ local dragonMountsList = { -- default to latest story dragon you have
   "Renewed Proto-Drake",
 }
 local function findMounts()
-  local function find(l)
+  local function find(l, cfg)
+    if cfg then
+      local c = Spectral.getConfig("mount", cfg)
+      if Spectral.isSpell(c) then return c end
+    end
     for _, m in pairs(l) do
       if Spectral.isSpell(m) then return m end
     end
   end
   
-  normalMount = find(mountsList)
+  normalMount = find(mountsList, "normalMount")
   mawMount = find(mawMountsList)
-  aquaticMount = find(aquaticMountsList)
-  dragonMount = find(dragonMountsList)
+  aquaticMount = find(aquaticMountsList, "aquaticMount")
+  dragonMount = find(dragonMountsList, "dragonMount")
   if not (IsSpellKnown(33388) or IsSpellKnown(33391) or IsSpellKnown(34090) or IsSpellKnown(34091) or IsSpellKnown(90265)) then
     normalMount = find{"Summon Chauffeur"}
     mawMount = nil
@@ -150,6 +154,7 @@ m = Spectral.createMacro("spx:mount", "Mount", function()
 end)
 m:updatesOn "zone" -- can change on entering the maw
 m:updatesOn "mountable"
+m:updatesOn "config"
 
 m = Spectral.createMacro("spx:stealth", "Stealth", function()
   local pd = Spectral.getPlayerData()

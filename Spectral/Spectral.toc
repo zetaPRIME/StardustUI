@@ -2,8 +2,10 @@
 ## Title: Spectral
 ## Author: Zithia Satazaki
 ## Version: 0.01
+## SavedVariables: __spectral_db
+## SavedVariablesPerCharacter: __spectral_db_local
 
 core.lua
 util.lua
 macros.lua
-ui.lua
+config.lua
