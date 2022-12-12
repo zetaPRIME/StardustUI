@@ -202,7 +202,7 @@ do
   
   healthBar.fill = healthBar:CreateTexture(nil, "ARTWORK")
   healthBar.fill:SetTexture(ui.texture "healthBarFill")
-  healthBar.fill:SetVertexColor(1.0, 0.15, 0.15)
+  healthBar.fill:SetVertexColor(1.0, 0.10, 0.25)
   healthBar.fill:SetPoint("LEFT", healthBar, "LEFT")
   healthBar.fill:SetPoint("RIGHT", healthBar, "RIGHT")
   
@@ -211,6 +211,13 @@ do
   healthBar.heal:SetVertexColor(0.25, 0.75, 0.70)
   healthBar.heal:SetPoint("LEFT", healthBar, "LEFT")
   healthBar.heal:SetPoint("RIGHT", healthBar, "RIGHT")
+  
+  healthBar.shield = healthBar:CreateTexture(nil, "ARTWORK", nil, 5)
+  healthBar.shield:SetTexture(ui.texture "healthBarFill")
+  healthBar.shield:SetVertexColor(1.0, 1.0, 1.0, 0.666)
+  healthBar.shield:SetPoint("LEFT", healthBar, "LEFT")
+  healthBar.shield:SetPoint("RIGHT", healthBar, "RIGHT")
+  healthBar.shield:SetBlendMode("ADD")
   
   healthBar.bg = healthBar:CreateTexture(nil, "BACKGROUND")
   healthBar.bg:SetTexture(ui.texture "healthBarBackground")
@@ -282,8 +289,12 @@ ui.playerHud:SetScript("onUpdate", function(self, dt)
     
     pcall(function() -- wrap this because otherwise it spams errors on zone load no matter how I try to validate
       local heal = min((health + UnitGetIncomingHeals("player")) / healthMax, 1.0)
+      local shield = min(UnitGetTotalAbsorbs("player") / healthMax, 1.0)
+      
       setBarRange(self.healthBar.fill, 0, healthProportion)
       setBarRange(self.healthBar.heal, healthProportion, heal)
+      setBarRange(self.healthBar.shield, 0, shield)
+      
       if self.powerType then
         local v, max, p = ui.getPowerValues(self.powerType)
         setBarRange(self.powerBar.fill, 0, p)
