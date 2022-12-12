@@ -22,9 +22,11 @@ local aquaticMountsList = {
   "Brinedeep Bottom-Feeder", -- the ugly fish
   
 }
-local dragonMountsList = {
+local dragonMountsList = { -- default to latest story dragon you have
+  "Cliffside Wylderdrake",
+  "Highland Drake",
   "Windborne Velocidrake",
-  "Renewed Proto-Drake", -- we'll start with just the first one you get
+  "Renewed Proto-Drake",
 }
 local function findMounts()
   local function find(l)
