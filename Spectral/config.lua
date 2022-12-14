@@ -7,10 +7,10 @@ Spectral.config = { }
 local events = { } do
   local handler = CreateFrame("Frame")
   handler:RegisterEvent("ADDON_LOADED")
-  handler:SetScript("OnEvent", function(self, event, ...)
-    if event == "ADDON_LOADED" then for k in pairs(events) do handler:RegisterEvent(k) end end
+  handler:SetScript("OnEvent", function(self, event, p1, ...)
+    if event == "ADDON_LOADED" and p1 == "Spectral" then for k in pairs(events) do handler:RegisterEvent(k) end end
     local ev = events[event];
-    if ev then ev(...) end
+    if ev then ev(p1, ...) end
   end)
 end
 
@@ -59,13 +59,66 @@ end
 do -- define panel
   local function pane(name)
     local p = CreateFrame("frame")
-    p.name = name
-    if name ~= "Spectral" then p.parent = "Spectral" end
+    p.name = name or "Spectral"
+    if p.name ~= "Spectral" then p.parent = "Spectral" end
     InterfaceOptions_AddCategory(p)
+    
+    p.category = string.lower(p.name)
+    
+    p._refresh = { }
+    --function p:refresh() for _,f in pairs(p._refresh) do f() end end
+    p:SetScript("OnShow", function(self) for _,f in pairs(p._refresh) do f() end end)
+    
+    function p:_updated()
+      if self.updateEvent then
+        
+        Spectral.queueUpdate(self.updateEvent)
+      end
+    end
+    
+    -- bind a widget to a config value
+    function p:bind(w, key, perChar)
+      local t = w:GetObjectType();
+      
+      if t == "EditBox" then
+        self._refresh[w] = function()
+          w:SetText(Spectral.getConfigRaw(self.category, key, perChar) or "")
+        end
+        
+        w:SetScript("OnEditFocusLost", function()
+          w:SetText(Spectral.getConfigRaw(self.category, key, perChar) or "")
+        end)
+        w:SetScript("OnEnterPressed", function()
+          Spectral.setConfig(self.category, key, w:GetText(), perChar)
+          w:ClearFocus()
+          self:_updated()
+        end)
+      end
+      
+      return w
+    end
+    
+    return p
   end
   
   local main = pane "Spectral"
   
   
-  local mount = pane "Mount"
+  do local p = pane "Mount"
+    p.updateEvent = "mountConfig"
+    
+    local title = p:CreateFontString("ARTWORK", nil, "GameFontNormalLarge")
+    title:SetPoint("TOP")
+    title:SetText("MyAddOn")
+    
+    local ea = CreateFrame("EditBox", nil, p, "InputBoxTemplate")
+    --ea:SetHeight(20)
+    ea:SetAutoFocus(false)
+    ea:SetSize(200, 20)
+    ea:SetPoint("TOPLEFT", 20, -20)
+    p:bind(ea, "dragonMount", true)
+  end
+  
+  
+  
 end

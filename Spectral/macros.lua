@@ -154,7 +154,7 @@ m = Spectral.createMacro("spx:mount", "Mount", function()
 end)
 m:updatesOn "zone" -- can change on entering the maw
 m:updatesOn "mountable"
-m:updatesOn "config"
+m:updatesOn "mountConfig"
 
 m = Spectral.createMacro("spx:stealth", "Stealth", function()
   local pd = Spectral.getPlayerData()
