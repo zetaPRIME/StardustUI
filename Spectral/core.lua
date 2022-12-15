@@ -341,7 +341,10 @@ do -- mountability change
   
   function baseFrame.events.SPELL_UPDATE_USABLE(tb)
     local m = IsUsableSpell(chk)
-    if m ~= mountable then Spectral.queueUpdate "mountable" end
+    if m ~= mountable then
+      Spectral.queueUpdate "mountable"
+      C_Timer.After(1, function() Spectral.queueUpdate "mountable" end)
+    end
     mountable = m
   end
 end
