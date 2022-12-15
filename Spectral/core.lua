@@ -337,15 +337,21 @@ function baseFrame.events.ZONE_CHANGED_NEW_AREA() C_Timer.After(0.5, function() 
 do -- mountability change
   local chk = 150544 -- we use mount roulette to check mountability
   local mountable = false
-  C_Timer.After(0.5, function() mountable = IsUsableSpell(chk) end)
+  local rchk = 368896 -- proto-drake for dragon
+  local ridable = false
+  C_Timer.After(0.5, function()
+    mountable = IsUsableSpell(chk)
+    ridable = IsUsableSpell(rchk)
+  end)
   
   function baseFrame.events.SPELL_UPDATE_USABLE(tb)
     local m = IsUsableSpell(chk)
-    if m ~= mountable then
+    local r = IsUsableSpell(rchk)
+    if m ~= mountable or r ~= ridable then
       Spectral.queueUpdate "mountable"
-      C_Timer.After(1, function() Spectral.queueUpdate "mountable" end)
     end
     mountable = m
+    ridable = r
   end
 end
 
