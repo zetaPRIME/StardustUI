@@ -27,3 +27,5 @@ Spectral {
   shadowlands flight logic
   zereth mortis flying logic
 }
+
+EventRegistry:RegisterCallback("ContainerFrame.OpenBag", function() end)

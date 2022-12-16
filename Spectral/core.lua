@@ -180,6 +180,9 @@ do -- macro ops
     return m
   end
   
+  -- standard stubs
+  function mp:reset() end -- for resetting cached settings and the like
+  
   function mp:updatesOn(...)
     local a = {...}
     for _, r in pairs(a) do self.updateReasons[r] = true end

@@ -71,8 +71,12 @@ do -- define panel
     
     function p:_updated()
       if self.updateEvent then
-        
-        Spectral.queueUpdate(self.updateEvent)
+        local t = type(self.updateEvent)
+        if t == "string" then
+          Spectral.queueUpdate(self.updateEvent)
+        elseif t == "function" then
+          self.updateEvent()
+        end
       end
     end
     
@@ -98,25 +102,72 @@ do -- define panel
       return w
     end
     
+    function p:optText(key, label, y)
+      local g = CreateFrame("Frame", nil, self)
+      g:SetPoint("LEFT", 0, 0)
+      g:SetPoint("RIGHT", -8, 0)
+      g:SetPoint("TOP", 0, y)
+      
+      local lbl = g:CreateFontString("ARTWORK", nil, "GameFontNormalMed2")
+      lbl:SetPoint("TOPLEFT")
+      lbl:SetText(label);
+      
+      local lw = 80
+      local lh = 20
+      
+      local lg = g:CreateFontString("ARTWORK", nil, "GameFontNormal")
+      lg:SetPoint("TOP", 0, -lh-3) lg:SetPoint("LEFT")
+      lg:SetText("Global")
+      
+      local eg = CreateFrame("EditBox", nil, g, "InputBoxTemplate")
+      eg:SetHeight(20)
+      eg:SetPoint("TOP", 0, -lh) eg:SetPoint("LEFT", lg, "RIGHT", 12, 0) eg:SetPoint("RIGHT", g, "CENTER", -4, 0)
+      self:bind(eg, key, false) eg:SetAutoFocus(false)
+      
+      local ll = g:CreateFontString("ARTWORK", nil, "GameFontNormal")
+      ll:SetPoint("TOP", 0, -lh-3) ll:SetPoint("LEFT", g, "CENTER", 4, 0)
+      ll:SetText("Character")
+      
+      local el = CreateFrame("EditBox", nil, g, "InputBoxTemplate")
+      el:SetHeight(20)
+      el:SetPoint("TOP", 0, -lh) el:SetPoint("LEFT", ll, "RIGHT", 12, 0) el:SetPoint("RIGHT")
+      self:bind(el, key, true) el:SetAutoFocus(false)
+      
+      return g
+    end
+    
     return p
   end
   
   local main = pane "Spectral"
   
   
-  do local p = pane "Mount"
-    p.updateEvent = "mountConfig"
+  do local p = pane "Mount Macro"
+    p.category = "mount"
+    function p.updateEvent()
+      Spectral.macros["spx:mount"]:reset()
+    end
     
-    local title = p:CreateFontString("ARTWORK", nil, "GameFontNormalLarge")
+    --[[local title = p:CreateFontString("ARTWORK", nil, "GameFontNormalLarge")
     title:SetPoint("TOP")
-    title:SetText("MyAddOn")
+    title:SetText("MyAddOn")--]]
     
-    local ea = CreateFrame("EditBox", nil, p, "InputBoxTemplate")
+    --[[local ea = CreateFrame("EditBox", nil, p, "InputBoxTemplate")
     --ea:SetHeight(20)
     ea:SetAutoFocus(false)
     ea:SetSize(200, 20)
     ea:SetPoint("TOPLEFT", 20, -20)
-    p:bind(ea, "dragonMount", true)
+    p:bind(ea, "dragonMount", true)--]]
+    
+    local adc = -4
+    local sh = 48
+    local function adv(h)
+      local t = adc
+      adc = adc - h
+      return t
+    end
+    p:optText("normalMount", "Normal Mount", adv(sh))
+    p:optText("dragonMount", "Dragon Riding Mount", adv(sh))
   end
   
   

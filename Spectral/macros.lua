@@ -154,7 +154,11 @@ m = Spectral.createMacro("spx:mount", "Mount", function()
 end)
 m:updatesOn "zone" -- can change on entering the maw
 m:updatesOn "mountable"
-m:updatesOn "mountConfig"
+m:updatesOn "spx:mount:reset"
+function m:reset()
+  normalMount = nil -- next update will rerun findMounts()
+  Spectral.queueUpdate "spx:mount:reset"
+end
 
 m = Spectral.createMacro("spx:stealth", "Stealth", function()
   local pd = Spectral.getPlayerData()
