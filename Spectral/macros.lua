@@ -142,6 +142,8 @@ m = Spectral.createMacro("spx:mount", "Mount", function()
       "#show " .. mount,
       branch { c = "[nomounted,nocanexitvehicle]",
         "/cancelaura Path of Greed",
+        --(function() if Spectral.spellKnown "Shadowmeld" then return "/cast [combat]Shadowmeld" end end)(),
+        (function() if Spectral.spellKnown "Zen Flight" then return "/cast [nocombat,noflying]!Zen Flight" end end)(),
         "/cast " .. mount,
         (function() if Spectral.spellKnown "Ghost Wolf" then return "/cast Ghost Wolf" end end)(),
       } {
