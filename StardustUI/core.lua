@@ -348,11 +348,13 @@ local PowerTypeOverride = {
   DRUID3 = {1, false}, -- guardian druid
   DRUID4 = {0, false}, -- resto druid
   SHAMAN2 = {0, function(u)  -- enh shaman; maelstrom weapon stacks
-    if not IsSpellKnown(187880) then return end -- don't have Maelstrom Weapon unlocked yet
+    --if not IsSpellKnown(187880) then return end -- don't have Maelstrom Weapon unlocked yet
     local m = powerTypeStats(u, 11) -- maelstrom
     function m.valueFunc(pt)
-      local name, icon, count = GetPlayerAuraBySpellID(344179)
-      return (count or 0), 10
+      local aura = C_UnitAuras.GetPlayerAuraBySpellID(344179)
+      if not aura then return 0, 1 end
+      local max = IsPlayerSpell(384143) and 10 or 5
+      return aura.applications, max
     end
     return m
   end},
@@ -377,8 +379,8 @@ end
 
 function ui.getPowerValues(pt, f)
   local v, m, p
-  if
-    pt.valueFunc then v, m, p = pt.valueFunc(pt)
+  if pt.valueFunc then
+    v, m, p = pt.valueFunc(pt)
   else
     v = UnitPower("player", pt.id)
     m = UnitPowerMax("player", pt.id)
