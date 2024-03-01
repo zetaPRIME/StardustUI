@@ -403,7 +403,7 @@ function ui.playerHud:setupForSpec()
   self.powerBar:Hide()
   self.powerBar2:Hide()
   
-  self.powerType = powerStats("player", 1)
+  self.powerType = powerStats("player", 0)
   self.powerType2 = nil
   
   local foundPrimary, foundSecondary = true, false
