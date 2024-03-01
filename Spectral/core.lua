@@ -62,7 +62,7 @@ local function collectFragment(f)
 end
 
 function tok(s)
-  return string.match(s,"(%S+)%s+(.+)")
+  return string.match(""..s,"(%S+)%s+(.+)")
 end
 
 local charLimit = 1022 - string.len("/click SPXf12345678 LeftButton 1")
