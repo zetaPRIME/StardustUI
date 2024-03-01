@@ -131,7 +131,9 @@ m = Spectral.createMacro("spx:mount", "Mount", function()
     end
     local mawRestriction = inMaw and not mawMountable
     local mount = (not mawRestriction) and normalMount or mawMount or ""
-    if Spectral.zoneIsDragonRiding() then mount = dragonMount or mount end
+    if dragonMount and Spectral.zoneIsDragonRiding() then
+      mount = "[mod:shift]" .. mount .. ";" .. dragonMount
+    end
     if z == "Vashj'ir" and Spectral.isSpell "Vashj'ir Seahorse" then
       mount = "[swimming,nomod:alt]Vashj'ir Seahorse;" .. mount -- this is faster than other aquatic mounts apparently?
     elseif aquaticMount then
