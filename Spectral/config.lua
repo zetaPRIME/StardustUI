@@ -57,11 +57,17 @@ end
 
 
 do -- define panel
+  local cat
   local function pane(name)
     local p = CreateFrame("frame")
     p.name = name or "Spectral"
     if p.name ~= "Spectral" then p.parent = "Spectral" end
-    InterfaceOptions_AddCategory(p)
+    if not p.parent then
+      cat = Settings.RegisterCanvasLayoutCategory(p, p.name)
+      Settings.RegisterAddOnCategory(cat)
+    else
+      Settings.RegisterCanvasLayoutSubcategory(cat, p, p.name)
+    end
     
     p.category = string.lower(p.name)
     
