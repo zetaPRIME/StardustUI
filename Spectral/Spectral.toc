@@ -5,7 +5,7 @@
 ## SavedVariables: __spectral_db
 ## SavedVariablesPerCharacter: __spectral_db_local
 
-core.lua
-util.lua
-macros.lua
-config.lua
+##core.lua
+##util.lua
+##macros.lua
+##config.lua
