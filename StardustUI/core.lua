@@ -360,6 +360,7 @@ local PowerTypeOverride = {
   end},
   EVOKER1 = {19, 0},
   EVOKER2 = {19, 0},
+  EVOKER3 = {19, 0},
 }
 
 powerTypeStats = function(u, id)
